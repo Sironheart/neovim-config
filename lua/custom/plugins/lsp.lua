@@ -147,6 +147,13 @@ return {
           nil_ls = {},
           terraformls = {},
           tsserver = {},
+          volar = {
+            init_options = {
+              vue = {
+                hybridMode = false,
+              },
+            },
+          },
           yamlls = {},
         }
 
@@ -167,13 +174,11 @@ return {
       end,
     },
   },
-  {
-    'saecki/crates.nvim',
-    tag = 'stable',
-    config = function()
-      require('crates').setup {}
-    end,
-  },
+  -- {
+  --   'saecki/crates.nvim',
+  --   tag = 'stable',
+  --   opts = {},
+  -- },
   {
     'stevearc/conform.nvim',
     event = { 'BufWritePre' },
