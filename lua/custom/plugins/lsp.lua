@@ -1,16 +1,6 @@
 return {
   {
     {
-      'folke/lazydev.nvim',
-      ft = 'lua',
-      opts = {
-        library = {
-          -- Load luvit types when the `vim.uv` word is found
-          { path = 'luvit-meta/library', words = { 'vim%.uv' } },
-        },
-      },
-    },
-    {
       'Bilal2453/luvit-meta',
       lazy = true,
     },
@@ -111,7 +101,18 @@ return {
         local servers = {
           astro = {},
           cssls = {},
-          diagnosticls = {},
+          denols = {},
+          docker_compose_language_service = {},
+          dockerls = {
+            settings = {
+              docker = {
+                languageserver = {
+                  formatter = { ignoreMultilineInstructions = true },
+                },
+              },
+            },
+            filetypes = { 'dockerfile', 'containerfile' },
+          },
           emmet_ls = {
             options = {
               ['jsx.enabled'] = true,
@@ -128,9 +129,7 @@ return {
               unusedparams = true,
             },
           },
-          html = {
-            filetypes = { 'html', 'templ', 'liquid', 'mjml' },
-          },
+          html = {},
           java_language_server = {},
           jsonls = {},
           kotlin_language_server = {},
@@ -143,8 +142,8 @@ return {
               },
             },
           },
-          nickel_ls = {},
           nil_ls = {},
+          ocamllsp = {},
           terraformls = {},
           tsserver = {},
           volar = {
@@ -174,25 +173,10 @@ return {
       end,
     },
   },
-  -- {
-  --   'saecki/crates.nvim',
-  --   tag = 'stable',
-  --   opts = {},
-  -- },
   {
     'stevearc/conform.nvim',
     event = { 'BufWritePre' },
     cmd = { 'ConformInfo' },
-    keys = {
-      {
-        '<leader>f',
-        function()
-          require('conform').format { async = true, lsp_format = 'fallback' }
-        end,
-        mode = '',
-        desc = '[F]ormat buffer',
-      },
-    },
     opts = {
       formatters_by_ft = {
         ['_'] = { 'prettier' },
@@ -203,27 +187,16 @@ return {
         just = { 'just' },
         lua = { 'stylua' },
         markdown = { 'prettier' },
-        nickel = { 'nickel' },
         nix = { 'alejandra' },
+        ocaml = { 'ocamlformat' },
         terraform = { 'terraform_fmt' },
         typescript = { 'biome', 'prettierd', 'prettier', stop_after_first = true },
+        yaml = { 'prettier' },
       },
-      format_on_save = function(bufnr)
-        -- Disable "format_on_save lsp_fallback" for languages that don't
-        -- have a well standardized coding style. You can add additional
-        -- languages here or re-enable it for the disabled ones.
-        local disable_filetypes = { c = true, cpp = true }
-        local lsp_format_opt
-        if disable_filetypes[vim.bo[bufnr].filetype] then
-          lsp_format_opt = 'never'
-        else
-          lsp_format_opt = 'fallback'
-        end
-        return {
-          timeout_ms = 500,
-          lsp_format = lsp_format_opt,
-        }
-      end,
+      format_on_save = {
+        timeout_ms = 500,
+        lsp_format = 'fallback',
+      },
     },
   },
 }

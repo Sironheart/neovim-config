@@ -5,16 +5,6 @@ return {
     'NoahTheDuke/vim-just',
     ft = { 'just' },
   },
-  {
-    'folke/todo-comments.nvim',
-    event = 'VimEnter',
-    dependencies = {
-      'nvim-lua/plenary.nvim',
-    },
-    opts = {
-      signs = false,
-    },
-  },
   { -- Adds git related signs to the gutter, as well as utilities for managing changes
     'lewis6991/gitsigns.nvim',
     opts = {
@@ -67,10 +57,5 @@ return {
     keys = {
       { '<C-n>', ':Oil<CR>' },
     },
-  },
-  {
-    'folke/trouble.nvim',
-    opts = {}, -- for default options, refer to the configuration section for custom setup.
-    cmd = 'Trouble',
   },
 }
