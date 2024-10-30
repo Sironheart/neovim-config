@@ -44,17 +44,19 @@ return {
     telescope.setup {
       defaults = {
         vimgrep_arguments = vimgrep_arguments,
+
         file_ignore_patterns = {
           'node_modules',
-          'yarn.lock',
           '.sl',
           '_build',
           '.next',
-          '^.git\\/',
+          '^.git/',
           '^.idea',
           '^.fleet',
           '^.vscode',
           '^.elixir_ls',
+          '^.yarn',
+          '.lock',
         },
         mappings = {
           i = {
@@ -75,7 +77,7 @@ return {
       },
       pickers = {
         find_files = {
-          find_command = { 'rg', '--files', '--hidden', '--glob', '!{**/.git}/**', '--trim' },
+          find_command = { 'rg', '--files', '--hidden', '--trim' },
         },
       },
     }

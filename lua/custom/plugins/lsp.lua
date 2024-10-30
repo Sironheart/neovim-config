@@ -101,7 +101,9 @@ return {
         local servers = {
           astro = {},
           cssls = {},
-          denols = {},
+          denols = {
+            root_dir = require('lspconfig.util').root_pattern('deno.json', '.git'),
+          },
           docker_compose_language_service = {},
           dockerls = {
             settings = {
@@ -118,6 +120,12 @@ return {
               ['jsx.enabled'] = true,
             },
             filetypes = { 'html', 'templ', 'liquid', 'mjml' },
+          },
+          eslint = {
+            cmd = { 'vscode-eslint-language-server', '--stdio', '--max-old-space-size=12288' },
+            settings = {
+              format = false,
+            },
           },
           elixirls = {
             cmd = { 'elixir-ls' },
@@ -143,9 +151,12 @@ return {
             },
           },
           nil_ls = {},
-          ocamllsp = {},
+          tailwindcss = {},
+          templ = {},
           terraformls = {},
-          tsserver = {},
+          tsserver = {
+            root_dir = require('lspconfig.util').root_pattern('tsconfig.json', '.git'),
+          },
           volar = {
             init_options = {
               vue = {
@@ -182,15 +193,16 @@ return {
         ['_'] = { 'prettier' },
         cue = { 'cuefmt' },
         go = { 'goimports', 'gofmt' },
-        javascript = { 'biome', 'prettierd', 'prettier', stop_after_first = true },
+        javascript = { 'biome', 'prettierd', 'prettier', 'deno', stop_after_first = true },
         json = { 'jq' },
         just = { 'just' },
         lua = { 'stylua' },
         markdown = { 'prettier' },
         nix = { 'alejandra' },
         ocaml = { 'ocamlformat' },
+        templ = { 'templ' },
         terraform = { 'terraform_fmt' },
-        typescript = { 'biome', 'prettierd', 'prettier', stop_after_first = true },
+        typescript = { 'biome', 'prettierd', 'prettier', 'deno', stop_after_first = true },
         yaml = { 'prettier' },
       },
       format_on_save = {

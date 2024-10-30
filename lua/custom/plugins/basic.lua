@@ -25,7 +25,7 @@ return {
     opts = {
       auto_save = true,
       auto_restore = true,
-      suppressed_dirs = { '~/', '~/projects', '~/privat', '~/Downloads', '/' },
+      suppressed_dirs = { '~/', '~/projects', '~/privat', '~/Downloads', '/', '~/projects/*/*' },
     },
   },
   {
