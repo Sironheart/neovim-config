@@ -5,6 +5,12 @@ return {
       lazy = true,
     },
     {
+      'MysticalDevil/inlay-hints.nvim',
+      event = 'LspAttach',
+      dependencies = { 'neovim/nvim-lspconfig' },
+      opts = {},
+    },
+    {
       -- Main LSP Configuration
       'neovim/nvim-lspconfig',
       dependencies = {
@@ -91,6 +97,18 @@ return {
           astro = {},
           cssls = {},
           denols = {
+            settings = {
+              deno = {
+                inlayHints = {
+                  parameterNames = { enabled = 'all', suppressWhenArgumentMatchesName = true },
+                  parameterTypes = { enabled = true },
+                  variableTypes = { enabled = true, suppressWhenTypeMatchesName = true },
+                  propertyDeclarationTypes = { enabled = true },
+                  functionLikeReturnTypes = { enable = true },
+                  enumMemberValues = { enabled = true },
+                },
+              },
+            },
             root_dir = require('lspconfig.util').root_pattern('deno.json', 'deno.jsonc'),
           },
           docker_compose_language_service = {},
@@ -114,6 +132,19 @@ return {
             cmd = { 'elixir-ls' },
           },
           gopls = {
+            settings = {
+              gopls = {
+                hints = {
+                  rangeVariableTypes = true,
+                  parameterNames = true,
+                  constantValues = true,
+                  assignVariableTypes = true,
+                  compositeLiteralFields = true,
+                  compositeLiteralTypes = true,
+                  functionTypeParameters = true,
+                },
+              },
+            },
             completeUnimported = true,
             usePlaceholders = true,
             analyses = {
@@ -127,6 +158,7 @@ return {
           lua_ls = {
             settings = {
               Lua = {
+                hint = { enable = true },
                 workspace = { checkThirdParty = false },
                 telemetry = { enable = false },
                 completion = { callSnippet = 'Replace' },
@@ -134,10 +166,74 @@ return {
             },
           },
           nil_ls = {},
+          rust_analyzer = {
+            settings = {
+              ['rust-analyzer'] = {
+                inlayHints = {
+                  bindingModeHints = {
+                    enable = false,
+                  },
+                  chainingHints = {
+                    enable = true,
+                  },
+                  closingBraceHints = {
+                    enable = true,
+                    minLines = 25,
+                  },
+                  closureReturnTypeHints = {
+                    enable = 'never',
+                  },
+                  lifetimeElisionHints = {
+                    enable = 'never',
+                    useParameterNames = false,
+                  },
+                  maxLength = 25,
+                  parameterHints = {
+                    enable = true,
+                  },
+                  reborrowHints = {
+                    enable = 'never',
+                  },
+                  renderColons = true,
+                  typeHints = {
+                    enable = true,
+                    hideClosureInitialization = false,
+                    hideNamedConstructor = false,
+                  },
+                },
+              },
+            },
+          },
           tailwindcss = {},
           templ = {},
           terraformls = {},
           ts_ls = {
+            settings = {
+              typescript = {
+                inlayHints = {
+                  includeInlayParameterNameHints = 'all',
+                  includeInlayParameterNameHintsWhenArgumentMatchesName = true,
+                  includeInlayFunctionParameterTypeHints = true,
+                  includeInlayVariableTypeHints = true,
+                  includeInlayVariableTypeHintsWhenTypeMatchesName = true,
+                  includeInlayPropertyDeclarationTypeHints = true,
+                  includeInlayFunctionLikeReturnTypeHints = true,
+                  includeInlayEnumMemberValueHints = true,
+                },
+              },
+              javascript = {
+                inlayHints = {
+                  includeInlayParameterNameHints = 'all',
+                  includeInlayParameterNameHintsWhenArgumentMatchesName = true,
+                  includeInlayFunctionParameterTypeHints = true,
+                  includeInlayVariableTypeHints = true,
+                  includeInlayVariableTypeHintsWhenTypeMatchesName = true,
+                  includeInlayPropertyDeclarationTypeHints = true,
+                  includeInlayFunctionLikeReturnTypeHints = true,
+                  includeInlayEnumMemberValueHints = true,
+                },
+              },
+            },
             root_dir = require('lspconfig.util').root_pattern('tsconfig.json', 'tsconfig.json', 'jsconfig.json'),
             single_file_support = false,
           },
@@ -149,6 +245,17 @@ return {
             },
           },
           yamlls = {},
+          zls = {
+            settings = {
+              zls = {
+                enable_inlay_hints = true,
+                inlay_hints_show_builtin = true,
+                inlay_hints_exclude_single_argument = true,
+                inlay_hints_hide_redundant_param_names = false,
+                inlay_hints_hide_redundant_param_names_last_token = false,
+              },
+            },
+          },
         }
 
         require('mason').setup {
