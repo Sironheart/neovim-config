@@ -27,7 +27,8 @@ return {
     { '<leader>sf', require('telescope.builtin').find_files, desc = '[S]earch [F]iles' },
     { '<leader>sg', require('telescope.builtin').live_grep, desc = '[S]earch using [G]rep' },
     { '<leader>sr', require('telescope.builtin').resume, desc = '[S]earch [R]esume' },
-    { '<leader><space>', require('telescope.builtin').buffers, desc = '[ ] Find existing buffers' },
+    { '<leader>sb', require('telescope.builtin').buffers, desc = '[S]earch existing [b]uffers' },
+    { '<leader><space>', require('telescope.builtin').oldfiles, desc = '[ ] Find last opened files' },
   },
   config = function()
     local telescope = require 'telescope'
@@ -56,6 +57,9 @@ return {
           '^.vscode',
           '^.elixir_ls',
           '^.yarn',
+          '^/nix',
+          '.local',
+          'Caches',
           '.lock',
         },
         mappings = {

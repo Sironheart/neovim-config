@@ -11,7 +11,6 @@ return {
         -- Automatically install LSPs and related tools to stdpath for Neovim
         { 'williamboman/mason.nvim', config = true }, -- NOTE: Must be loaded before dependants
         'williamboman/mason-lspconfig.nvim',
-        'WhoIsSethDaniel/mason-tool-installer.nvim',
 
         -- Useful status updates for LSP.
         -- NOTE: `opts = {}` is the same as calling `require('fidget').setup({})`
@@ -82,16 +81,6 @@ return {
                 end,
               })
             end
-
-            -- The following code creates a keymap to toggle inlay hints in your
-            -- code, if the language server you are using supports them
-            --
-            -- This may be unwanted, since they displace some of your code
-            if client and client.supports_method(vim.lsp.protocol.Methods.textDocument_inlayHint) then
-              map('<leader>th', function()
-                vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled { bufnr = event.buf })
-              end, '[T]oggle Inlay [H]ints')
-            end
           end,
         })
 
@@ -102,7 +91,7 @@ return {
           astro = {},
           cssls = {},
           denols = {
-            root_dir = require('lspconfig.util').root_pattern('deno.json', '.git'),
+            root_dir = require('lspconfig.util').root_pattern('deno.json', 'deno.jsonc'),
           },
           docker_compose_language_service = {},
           dockerls = {
@@ -120,12 +109,6 @@ return {
               ['jsx.enabled'] = true,
             },
             filetypes = { 'html', 'templ', 'liquid', 'mjml' },
-          },
-          eslint = {
-            cmd = { 'vscode-eslint-language-server', '--stdio', '--max-old-space-size=12288' },
-            settings = {
-              format = false,
-            },
           },
           elixirls = {
             cmd = { 'elixir-ls' },
@@ -154,8 +137,9 @@ return {
           tailwindcss = {},
           templ = {},
           terraformls = {},
-          tsserver = {
-            root_dir = require('lspconfig.util').root_pattern('tsconfig.json', '.git'),
+          ts_ls = {
+            root_dir = require('lspconfig.util').root_pattern('tsconfig.json', 'tsconfig.json', 'jsconfig.json'),
+            single_file_support = false,
           },
           volar = {
             init_options = {
@@ -167,20 +151,14 @@ return {
           yamlls = {},
         }
 
-        require('mason').setup()
-
-        require('mason-lspconfig').setup {
-          handlers = {
-            function(server_name)
-              local server = servers[server_name] or {}
-              -- This handles overriding only values explicitly passed
-              -- by the server configuration above. Useful when disabling
-              -- certain features of an LSP (for example, turning off formatting for ts_ls)
-              server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
-              require('lspconfig')[server_name].setup(server)
-            end,
-          },
+        require('mason').setup {
+          PATH = 'append',
         }
+        require('mason-lspconfig').setup()
+
+        for key, value in pairs(servers) do
+          require('lspconfig')[key].setup(value)
+        end
       end,
     },
   },
