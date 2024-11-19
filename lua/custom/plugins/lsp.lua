@@ -1,10 +1,6 @@
 return {
   {
     {
-      'Bilal2453/luvit-meta',
-      lazy = true,
-    },
-    {
       'MysticalDevil/inlay-hints.nvim',
       event = 'LspAttach',
       dependencies = { 'neovim/nvim-lspconfig' },
@@ -90,6 +86,21 @@ return {
           end,
         })
 
+        require('mason').setup {
+          PATH = 'append',
+        }
+        require('mason-lspconfig').setup()
+
+        local ts_ls_inlayhint_config = {
+          inlayHints = {
+            includeInlayEnumMemberValueHints = true,
+            includeInlayParameterNameHints = 'all',
+            includeInlayPropertyDeclarationTypeHints = true,
+            includeInlayVariableTypeHints = true,
+            includeInlayVariableTypeHintsWhenTypeMatchesName = true,
+          },
+        }
+
         local capabilities = vim.lsp.protocol.make_client_capabilities()
         capabilities = vim.tbl_deep_extend('force', capabilities, require('cmp_nvim_lsp').default_capabilities())
 
@@ -100,100 +111,54 @@ return {
             settings = {
               deno = {
                 inlayHints = {
-                  parameterNames = { enabled = 'all', suppressWhenArgumentMatchesName = true },
-                  parameterTypes = { enabled = true },
-                  variableTypes = { enabled = true, suppressWhenTypeMatchesName = true },
-                  propertyDeclarationTypes = { enabled = true },
-                  functionLikeReturnTypes = { enable = true },
                   enumMemberValues = { enabled = true },
+                  parameterNames = { enabled = 'all', suppressWhenArgumentMatchesName = true },
+                  propertyDeclarationTypes = { enabled = true },
+                  variableTypes = { enabled = true, suppressWhenTypeMatchesName = true },
                 },
               },
             },
             root_dir = require('lspconfig.util').root_pattern('deno.json', 'deno.jsonc'),
+            single_file_support = false,
           },
-          docker_compose_language_service = {},
-          dockerls = {
-            settings = {
-              docker = {
-                languageserver = {
-                  formatter = { ignoreMultilineInstructions = true },
-                },
-              },
-            },
-            filetypes = { 'dockerfile', 'containerfile' },
-          },
-          emmet_ls = {
-            options = {
-              ['jsx.enabled'] = true,
-            },
-            filetypes = { 'html', 'templ', 'liquid', 'mjml' },
-          },
-          elixirls = {
-            cmd = { 'elixir-ls' },
-          },
+          elixirls = {},
+          emmet_ls = { options = { ['jsx.enabled'] = true } },
           gopls = {
             settings = {
               gopls = {
                 hints = {
-                  rangeVariableTypes = true,
-                  parameterNames = true,
-                  constantValues = true,
                   assignVariableTypes = true,
                   compositeLiteralFields = true,
                   compositeLiteralTypes = true,
+                  constantValues = true,
                   functionTypeParameters = true,
+                  parameterNames = true,
+                  rangeVariableTypes = true,
                 },
               },
             },
             completeUnimported = true,
             usePlaceholders = true,
-            analyses = {
-              unusedparams = true,
-            },
+            analyses = { unusedparams = true },
           },
           html = {},
           java_language_server = {},
           jsonls = {},
           kotlin_language_server = {},
-          lua_ls = {
-            settings = {
-              Lua = {
-                hint = { enable = true },
-                workspace = { checkThirdParty = false },
-                telemetry = { enable = false },
-                completion = { callSnippet = 'Replace' },
-              },
-            },
-          },
+          lua_ls = { settings = { Lua = { hint = { enable = true }, workspace = { checkThirdParty = 'Disable' } } } },
           nil_ls = {},
           rust_analyzer = {
             settings = {
               ['rust-analyzer'] = {
                 inlayHints = {
-                  bindingModeHints = {
-                    enable = false,
-                  },
-                  chainingHints = {
-                    enable = true,
-                  },
-                  closingBraceHints = {
-                    enable = true,
-                    minLines = 25,
-                  },
-                  closureReturnTypeHints = {
-                    enable = 'never',
-                  },
-                  lifetimeElisionHints = {
-                    enable = 'never',
-                    useParameterNames = false,
-                  },
+                  bindingModeHints = { enable = false },
+                  chainingHints = { enable = true },
+                  closingBraceHints = { enable = true, minLines = 25 },
+                  closureReturnTypeHints = { enable = 'never' },
+                  lifetimeElisionHints = { enable = 'never', useParameterNames = false },
                   maxLength = 25,
-                  parameterHints = {
-                    enable = true,
-                  },
-                  reborrowHints = {
-                    enable = 'never',
-                  },
+                  parameterHints = { enable = true },
+                  reborrowHints = { enable = 'never' },
                   renderColons = true,
                   typeHints = {
                     enable = true,
@@ -208,60 +173,13 @@ return {
           templ = {},
           terraformls = {},
           ts_ls = {
-            settings = {
-              typescript = {
-                inlayHints = {
-                  includeInlayParameterNameHints = 'all',
-                  includeInlayParameterNameHintsWhenArgumentMatchesName = true,
-                  includeInlayFunctionParameterTypeHints = true,
-                  includeInlayVariableTypeHints = true,
-                  includeInlayVariableTypeHintsWhenTypeMatchesName = true,
-                  includeInlayPropertyDeclarationTypeHints = true,
-                  includeInlayFunctionLikeReturnTypeHints = true,
-                  includeInlayEnumMemberValueHints = true,
-                },
-              },
-              javascript = {
-                inlayHints = {
-                  includeInlayParameterNameHints = 'all',
-                  includeInlayParameterNameHintsWhenArgumentMatchesName = true,
-                  includeInlayFunctionParameterTypeHints = true,
-                  includeInlayVariableTypeHints = true,
-                  includeInlayVariableTypeHintsWhenTypeMatchesName = true,
-                  includeInlayPropertyDeclarationTypeHints = true,
-                  includeInlayFunctionLikeReturnTypeHints = true,
-                  includeInlayEnumMemberValueHints = true,
-                },
-              },
-            },
+            settings = { typescript = { ts_ls_inlayhint_config }, javascript = { ts_ls_inlayhint_config } },
             root_dir = require('lspconfig.util').root_pattern('tsconfig.json', 'tsconfig.json', 'jsconfig.json'),
             single_file_support = false,
           },
-          volar = {
-            init_options = {
-              vue = {
-                hybridMode = false,
-              },
-            },
-          },
+          volar = { init_options = { vue = { hybridMode = false } } },
           yamlls = {},
-          zls = {
-            settings = {
-              zls = {
-                enable_inlay_hints = true,
-                inlay_hints_show_builtin = true,
-                inlay_hints_exclude_single_argument = true,
-                inlay_hints_hide_redundant_param_names = false,
-                inlay_hints_hide_redundant_param_names_last_token = false,
-              },
-            },
-          },
         }
-
-        require('mason').setup {
-          PATH = 'append',
-        }
-        require('mason-lspconfig').setup()
 
         for key, value in pairs(servers) do
           require('lspconfig')[key].setup(value)
@@ -278,16 +196,16 @@ return {
         ['_'] = { 'prettier' },
         cue = { 'cuefmt' },
         go = { 'goimports', 'gofmt' },
-        javascript = { 'biome', 'prettierd', 'prettier', 'deno', stop_after_first = true },
+        javascript = { 'deno', 'biome', 'prettierd', 'prettier', stop_after_first = true },
         json = { 'jq' },
         just = { 'just' },
         lua = { 'stylua' },
         markdown = { 'prettier' },
         nix = { 'alejandra' },
-        ocaml = { 'ocamlformat' },
+        rust = { 'rustfmt' },
         templ = { 'templ' },
-        terraform = { 'terraform_fmt' },
-        typescript = { 'biome', 'prettierd', 'prettier', 'deno', stop_after_first = true },
+        terraform = { 'tofu_fmt', 'terraform_fmt', stop_after_first = true },
+        typescript = { 'deno', 'biome', 'prettierd', 'prettier', stop_after_first = true },
         yaml = { 'prettier' },
       },
       format_on_save = {
