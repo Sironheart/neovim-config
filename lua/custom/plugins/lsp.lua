@@ -121,8 +121,11 @@ return {
             root_dir = require('lspconfig.util').root_pattern('deno.json', 'deno.jsonc'),
             single_file_support = false,
           },
-          elixirls = {},
+          docker_compose_language_service = {},
+          dockerls = {},
+          elixirls = { cmd = { 'elixir-ls' } },
           emmet_ls = { options = { ['jsx.enabled'] = true } },
+          gleam = {},
           gopls = {
             settings = {
               gopls = {
@@ -138,11 +141,8 @@ return {
               },
             },
             completeUnimported = true,
-            usePlaceholders = true,
-            analyses = { unusedparams = true },
           },
           html = {},
-          java_language_server = {},
           jsonls = {},
           kotlin_language_server = {},
           lua_ls = { settings = { Lua = { hint = { enable = true }, workspace = { checkThirdParty = 'Disable' } } } },
@@ -169,7 +169,6 @@ return {
               },
             },
           },
-          tailwindcss = {},
           templ = {},
           terraformls = {},
           ts_ls = {
@@ -195,6 +194,7 @@ return {
       formatters_by_ft = {
         ['_'] = { 'prettier' },
         cue = { 'cuefmt' },
+        elixir = { 'mix' },
         go = { 'goimports', 'gofmt' },
         javascript = { 'deno', 'biome', 'prettierd', 'prettier', stop_after_first = true },
         json = { 'jq' },

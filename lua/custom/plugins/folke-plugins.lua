@@ -1,5 +1,42 @@
 return {
   {
+    'folke/persistence.nvim',
+    event = 'BufReadPre',
+    opts = {
+      branch = false,
+    },
+    keys = {
+      {
+        '<leader>qs',
+        function()
+          require('persistence').load()
+        end,
+        desc = 'Restore session',
+      },
+      {
+        '<leader>qS',
+        function()
+          require('persistence').select()
+        end,
+        desc = 'select a session to load',
+      },
+      {
+        '<leader>ql',
+        function()
+          require('persistence').load { last = true }
+        end,
+        desc = 'load last session',
+      },
+      {
+        '<leader>qd',
+        function()
+          require('persistence').stop()
+        end,
+        desc = 'Prevent session save on exit',
+      },
+    },
+  },
+  {
     'folke/todo-comments.nvim',
     event = 'VimEnter',
     dependencies = {
@@ -82,12 +119,9 @@ return {
     -- Document existing key chains
     spec = {
       { '<leader>c', group = '[C]ode' },
-      { '<leader>d', group = '[D]ebugger' },
-      { '<leader>g', group = '[G]it' },
-      { '<leader>h', group = '[H]arpoon' },
       { '<leader>r', group = '[R]ename' },
       { '<leader>s', group = '[S]earch' },
-      { { '<leader>', group = 'VISUAL <leader>' }, mode = { 'v' } },
+      { '<leader>q', group = 'Session Peristence' },
     },
   },
 }

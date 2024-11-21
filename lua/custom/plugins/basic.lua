@@ -18,17 +18,6 @@ return {
     },
   },
   {
-    'rmagatti/auto-session',
-    dependencies = {
-      'nvim-telescope/telescope.nvim',
-    },
-    opts = {
-      auto_save = true,
-      auto_restore = true,
-      suppressed_dirs = { '~/', '~/projects', '~/privat', '~/Downloads', '/', '~/projects/*/*' },
-    },
-  },
-  {
     'lewis6991/gitsigns.nvim',
     opts = {
       signs = {
