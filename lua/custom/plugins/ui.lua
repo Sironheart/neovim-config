@@ -1,12 +1,9 @@
 return {
-
   {
-    'nyoom-engineering/oxocarbon.nvim',
-    lazy = false,
-    priority = 1000,
-    init = function()
-      vim.opt.background = 'dark'
-      vim.cmd.colorscheme 'oxocarbon'
+    'kepano/flexoki-neovim',
+    as = 'flexoki',
+    config = function()
+      vim.cmd.colorscheme = 'flexoki-dark'
     end,
   },
   {
@@ -30,7 +27,13 @@ return {
     },
     dependencies = {
       'MunifTanjim/nui.nvim',
-      { 'rcarriga/nvim-notify', opts = { background_colour = '#000000' } },
+      {
+        'rcarriga/nvim-notify',
+        opts = {
+          timeout = 100,
+          render = 'wrapped-compact',
+        },
+      },
     },
   },
 }
