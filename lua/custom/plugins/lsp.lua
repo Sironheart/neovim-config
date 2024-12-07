@@ -87,9 +87,25 @@ return {
         })
 
         require('mason').setup {
-          PATH = 'append',
+          PATH = 'prepend',
         }
-        require('mason-lspconfig').setup()
+        require('mason-lspconfig').setup {
+          automatic_installation = false,
+          ensure_installed = {
+            'astro',
+            'cssls',
+            'elixirls',
+            'emmet_ls',
+            'gopls',
+            'html',
+            'jsonls',
+            'lua_ls',
+            'terraformls',
+            'ts_ls',
+            'volar',
+            'yamlls',
+          },
+        }
 
         local ts_ls_inlayhint_config = {
           inlayHints = {

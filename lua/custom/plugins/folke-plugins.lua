@@ -36,6 +36,30 @@ return {
       },
     },
   },
+
+  {
+    'folke/snacks.nvim',
+    priority = 1000,
+    lazy = false,
+    opts = {
+      notifier = { enabled = true, style = 'minimal' },
+      lazygit = { enabled = true },
+    },
+    keys = {
+      {
+        '<leader>lg',
+        function()
+          require('snacks').lazygit.open()
+        end,
+        desc = 'Open lazygit',
+      },
+    },
+    -- config = function()
+    --   local snacks = require 'snacks'
+    --   vim.keymap.set('n', '<leader>lg', snacks.lazygit.open, { noremap = true, silent = true })
+    -- end,
+  },
+
   {
     'folke/todo-comments.nvim',
     event = 'VimEnter',
@@ -46,11 +70,13 @@ return {
       signs = false,
     },
   },
+
   {
     'folke/trouble.nvim',
     opts = {}, -- for default options, refer to the configuration section for custom setup.
     cmd = 'Trouble',
   },
+
   {
     'folke/lazydev.nvim',
     dependencies = {
@@ -64,6 +90,7 @@ return {
       },
     },
   },
+
   {
     'folke/trouble.nvim',
     opts = {}, -- for default options, refer to the configuration section for custom setup.
@@ -76,6 +103,7 @@ return {
       },
     },
   },
+
   'folke/which-key.nvim',
   event = 'VimEnter', -- Sets the loading event to 'VimEnter'
   opts = {
