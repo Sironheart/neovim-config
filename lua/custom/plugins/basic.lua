@@ -1,22 +1,7 @@
 return {
   { 'tpope/vim-sleuth' },
-  { 'numToStr/Comment.nvim', opts = {} },
-  {
-    'NoahTheDuke/vim-just',
-    ft = { 'just' },
-  },
-  { -- Adds git related signs to the gutter, as well as utilities for managing changes
-    'lewis6991/gitsigns.nvim',
-    opts = {
-      signs = {
-        add = { text = '+' },
-        change = { text = '~' },
-        delete = { text = '_' },
-        topdelete = { text = '‾' },
-        changedelete = { text = '~' },
-      },
-    },
-  },
+  { 'JoosepAlviste/nvim-ts-context-commentstring', opts = { enable_autocmd = false } },
+  { 'NoahTheDuke/vim-just', ft = { 'just' } },
   {
     'lewis6991/gitsigns.nvim',
     opts = {
@@ -33,10 +18,7 @@ return {
     'stevearc/oil.nvim',
     opts = {
       columns = { 'icon' },
-      keymaps = {
-        ['<C-h>'] = false,
-        ['<M-h>'] = false,
-      },
+      watch_for_changes = true,
       view_options = {
         show_hidden = true,
       },
@@ -44,7 +26,7 @@ return {
     -- Optional dependencies
     dependencies = { { 'echasnovski/mini.icons', opts = {} } },
     keys = {
-      { '<C-n>', ':Oil<CR>' },
+      { '<leader>oo', ':Oil<CR>', desc = 'Open file buffer' },
     },
   },
 }

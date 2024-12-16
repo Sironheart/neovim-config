@@ -18,8 +18,8 @@ return {
         -- NOTE: `opts = {}` is the same as calling `require('fidget').setup({})`
         { 'j-hui/fidget.nvim', opts = {} },
 
-        -- Allows extra capabilities provided by nvim-cmp
-        'hrsh7th/cmp-nvim-lsp',
+        -- For the capabilities
+        'saghen/blink.cmp',
       },
       config = function()
         vim.api.nvim_create_autocmd('LspAttach', {
@@ -87,7 +87,7 @@ return {
         })
 
         require('mason').setup {
-          PATH = 'prepend',
+          PATH = 'append',
         }
         require('mason-lspconfig').setup {
           automatic_installation = false,
@@ -118,7 +118,7 @@ return {
         }
 
         local capabilities = vim.lsp.protocol.make_client_capabilities()
-        capabilities = vim.tbl_deep_extend('force', capabilities, require('cmp_nvim_lsp').default_capabilities())
+        capabilities = require('blink.cmp').get_lsp_capabilities(capabilities)
 
         local servers = {
           astro = {},
@@ -185,6 +185,7 @@ return {
               },
             },
           },
+          tailwindcss = {},
           templ = {},
           terraformls = {},
           ts_ls = {
@@ -196,8 +197,12 @@ return {
           yamlls = {},
         }
 
-        for key, value in pairs(servers) do
-          require('lspconfig')[key].setup(value)
+        local lspconfig = require 'lspconfig'
+        local blink = require 'blink.cmp'
+
+        for server, config in pairs(servers) do
+          config.capabilities = blink.get_lsp_capabilities(config.capabilities)
+          lspconfig[server].setup(config)
         end
       end,
     },
@@ -212,7 +217,7 @@ return {
         cue = { 'cuefmt' },
         elixir = { 'mix' },
         go = { 'goimports', 'gofmt' },
-        javascript = { 'deno', 'biome', 'prettierd', 'prettier', stop_after_first = true },
+        javascript = { 'biome', 'prettierd', 'deno', 'prettier', stop_after_first = true },
         json = { 'jq' },
         just = { 'just' },
         lua = { 'stylua' },
@@ -221,7 +226,7 @@ return {
         rust = { 'rustfmt' },
         templ = { 'templ' },
         terraform = { 'tofu_fmt', 'terraform_fmt', stop_after_first = true },
-        typescript = { 'deno', 'biome', 'prettierd', 'prettier', stop_after_first = true },
+        typescript = { 'biome', 'prettierd', 'deno', 'prettier', stop_after_first = true },
         yaml = { 'prettier' },
       },
       format_on_save = {

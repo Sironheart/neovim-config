@@ -1,80 +1,38 @@
 return {
   {
-    'hrsh7th/nvim-cmp',
-    event = 'InsertEnter',
+    'saghen/blink.cmp',
+    lazy = false,
     dependencies = {
-      {
-        'L3MON4D3/LuaSnip',
-        build = (function()
-          if vim.fn.has 'win32' == 1 or vim.fn.executable 'make' == 0 then
-            return
-          end
-          return 'make install_jsregexp'
-        end)(),
-        dependencies = {
-          {
-            'rafamadriz/friendly-snippets',
-            config = function()
-              require('luasnip.loaders.from_vscode').lazy_load()
-            end,
-          },
+      'rafamadriz/friendly-snippets',
+    },
+    version = 'v0.*',
+    opts = {
+      keymap = {
+        preset = 'default',
+        -- ['<C-space>'] = { 'show', 'show_documentation', 'hide_documentation' },
+        -- ['<C-e>'] = { 'hide' },
+        -- ['<C-y>'] = { 'select_and_accept' },
+        --
+        -- ['<C-p>'] = { 'select_prev', 'fallback' },
+        -- ['<C-n>'] = { 'select_next', 'fallback' },
+        --
+        -- ['<C-b>'] = { 'scroll_documentation_up', 'fallback' },
+        -- ['<C-f>'] = { 'scroll_documentation_down', 'fallback' },
+        --
+        -- ['<Tab>'] = { 'snippet_forward', 'fallback' },
+        -- ['<S-Tab>'] = { 'snippet_backward', 'fallback' },
+
+        -- Needs to be added, to allow the usage of Github Copilot on <C-y>
+        ['<C-y>'] = { 'select_and_accept', 'fallback' },
+      },
+      completion = {
+        menu = {
+          auto_show = false,
+        },
+        documentation = {
+          auto_show = true,
         },
       },
-      'onsails/lspkind.nvim',
-      'saadparwaiz1/cmp_luasnip',
-      'hrsh7th/cmp-nvim-lsp',
-      'hrsh7th/cmp-path',
     },
-    config = function()
-      local cmp = require 'cmp'
-      local luasnip = require 'luasnip'
-      local lspkind = require 'lspkind'
-
-      require('luasnip.loaders.from_vscode').lazy_load()
-
-      cmp.setup {
-        formatting = {
-          fields = { 'menu', 'abbr', 'kind' },
-          expandable_indicator = true,
-          format = lspkind.cmp_format {
-            mode = 'symbol_text',
-            maxwidth = 100,
-            show_labelDetails = true,
-          },
-        },
-        snippet = {
-          expand = function(args)
-            luasnip.lsp_expand(args.body)
-          end,
-        },
-        window = {
-          completion = cmp.config.window.bordered(),
-          documentation = cmp.config.window.bordered(),
-        },
-        completion = {
-          completeopt = 'menu,menuone,noinsert',
-        },
-        mapping = cmp.mapping.preset.insert {
-          ['<C-n>'] = cmp.mapping.select_next_item(),
-          ['<C-p>'] = cmp.mapping.select_prev_item(),
-          ['<C-u>'] = cmp.mapping.scroll_docs(4),
-          ['<C-d>'] = cmp.mapping.scroll_docs(-4),
-          ['<C-y>'] = cmp.mapping.confirm { select = true },
-          ['<C-c>'] = cmp.mapping.abort(),
-          ['<C-Space>'] = nil,
-          ['<CR>'] = nil,
-          ['<Down>'] = nil,
-          ['<Up>'] = nil,
-          ['<Tab>'] = nil,
-          ['<S-Tab>'] = nil,
-        },
-        sources = {
-          { name = 'nvim_lsp' },
-          { name = 'luasnip' },
-          { name = 'path', max_item_count = 5 },
-        },
-      }
-      luasnip.config.setup {}
-    end,
   },
 }
