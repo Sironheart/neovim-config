@@ -42,8 +42,10 @@ return {
     priority = 1000,
     lazy = false,
     opts = {
-      notifier = { enabled = true, style = 'minimal' },
+      notifier = { enabled = true },
+      indent = { enabled = true },
       lazygit = { enabled = true },
+      statuscolumn = { enabled = true },
     },
     keys = {
       {
@@ -54,10 +56,6 @@ return {
         desc = 'Open lazygit',
       },
     },
-    -- config = function()
-    --   local snacks = require 'snacks'
-    --   vim.keymap.set('n', '<leader>lg', snacks.lazygit.open, { noremap = true, silent = true })
-    -- end,
   },
 
   {
