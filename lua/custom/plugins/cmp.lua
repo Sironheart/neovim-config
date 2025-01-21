@@ -26,9 +26,6 @@ return {
         ['<C-y>'] = { 'select_and_accept', 'fallback' },
       },
       completion = {
-        menu = {
-          auto_show = false,
-        },
         documentation = {
           auto_show = true,
         },

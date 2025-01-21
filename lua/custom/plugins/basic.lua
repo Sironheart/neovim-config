@@ -26,7 +26,7 @@ return {
     -- Optional dependencies
     dependencies = { { 'echasnovski/mini.icons', opts = {} } },
     keys = {
-      { '<leader>oo', ':Oil<CR>', desc = 'Open file buffer' },
+      { '<leader>o', ':Oil<CR>', desc = 'Open file buffer' },
     },
   },
 }
