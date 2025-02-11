@@ -29,27 +29,24 @@ return {
               vim.keymap.set('n', keys, func, { buffer = event.buf, desc = 'LSP: ' .. desc })
             end
 
-            -- Jump to the definition of the word under your cursor.
-            --  This is where a variable was first declared, or where a function is defined, etc.
-            --  To jump back, press <C-T>.
-            map('gd', require('telescope.builtin').lsp_definitions, '[G]oto [D]efinition')
+            map('gd', require('snacks').picker.lsp_definitions, '[G]oto [D]efinition')
 
             map('gvd', function()
               require('telescope.builtin').lsp_definitions { jump_type = 'vsplit' }
             end, '[G]oto [D]efinition')
 
             map('gr', function()
-              require('telescope.builtin').lsp_references { jump_type = true }
+              require('snacks').picker.lsp_references { jump_type = true }
             end, '[G]oto [R]eferences')
 
-            map('gI', require('telescope.builtin').lsp_implementations, '[G]oto [I]mplementation')
+            map('gI', require('snacks').picker.lsp_implementations, '[G]oto [I]mplementation')
 
             map('gvI', function()
-              require('telescope.builtin').lsp_implementations { jump_type = 'vsplit' }
+              require('snacks').picker.lsp_implementations { jump_type = 'vsplit' }
             end, '[G]oto [I]mplementation')
 
             map('<leader>D', function()
-              require('telescope.builtin').lsp_type_definitions()
+              require('snacks').picker.lsp_type_definitions()
             end, 'Type [D]efinition')
 
             map('<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame')

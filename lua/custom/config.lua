@@ -49,10 +49,13 @@ vim.opt.inccommand = 'split'
 vim.opt.cursorline = true
 
 -- Minimal number of screen lines to keep above and below the cursor.
-vim.opt.scrolloff = 5
+vim.opt.scrolloff = 2
 
 -- INFO: Test setting of disabling swap files
 vim.opt.swapfile = false
+
+-- Snacks.statuscolumn
+vim.o.statuscolumn = ''
 
 -- Clear highlights on search when pressing <Esc> in normal mode
 --  See `:help hlsearch`
