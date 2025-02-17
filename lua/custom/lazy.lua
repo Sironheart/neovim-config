@@ -12,6 +12,7 @@ vim.opt.rtp:prepend(lazypath)
 require('lazy').setup {
   spec = {
     { import = 'custom.plugins' },
+    { import = 'custom.plugins.folke' },
   },
   ui = {
     icons = vim.g.have_nerd_font and {} or {
