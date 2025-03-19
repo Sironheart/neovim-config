@@ -4,8 +4,8 @@ return {
   priority = 1000,
   lazy = false,
   opts = {
-    indent = { enabled = true },
     image = { enabled = true },
+    indent = { enabled = true },
     input = { enabled = true },
     lazygit = { enabled = true },
     notifier = { enabled = true },
@@ -38,7 +38,19 @@ return {
     {
       '<leader>sg',
       function()
-        require('snacks').picker.grep()
+        local snacks = require 'snacks'
+        local output = vim.fn.system 'git rev-parse --is-inside-work-tree 2>/dev/null'
+
+        if vim.v.shell_error == 0 and output:match 'true' ~= nil then
+          snacks.picker.git_grep {}
+        else
+          snacks.picker.grep {
+            exclude = {
+              'node_modules',
+              '\\.lock',
+            },
+          }
+        end
       end,
       desc = 'Search Grep',
     },

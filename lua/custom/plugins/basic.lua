@@ -1,5 +1,6 @@
 return {
   { 'tpope/vim-sleuth' },
+  { 'tpope/vim-surround' },
   { 'JoosepAlviste/nvim-ts-context-commentstring', opts = { enable_autocmd = false } },
   { 'NoahTheDuke/vim-just', ft = { 'just' } },
   {

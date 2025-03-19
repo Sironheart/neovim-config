@@ -160,6 +160,7 @@ return {
           kotlin_language_server = {},
           lua_ls = { settings = { Lua = { hint = { enable = true }, workspace = { checkThirdParty = 'Disable' } } } },
           nil_ls = {},
+          pyright = {},
           rust_analyzer = {
             settings = {
               ['rust-analyzer'] = {
@@ -220,6 +221,7 @@ return {
         lua = { 'stylua' },
         markdown = { 'prettier' },
         nix = { 'alejandra' },
+        python = { 'ruff' },
         rust = { 'rustfmt' },
         templ = { 'templ' },
         terraform = { 'tofu_fmt', 'terraform_fmt', stop_after_first = true },
