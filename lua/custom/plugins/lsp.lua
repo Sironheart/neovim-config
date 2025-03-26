@@ -91,7 +91,6 @@ return {
           ensure_installed = {
             'astro',
             'cssls',
-            'elixirls',
             'emmet_ls',
             'gopls',
             'html',
@@ -136,7 +135,6 @@ return {
           },
           docker_compose_language_service = {},
           dockerls = {},
-          elixirls = { cmd = { 'elixir-ls' } },
           emmet_ls = { options = { ['jsx.enabled'] = true } },
           gleam = {},
           gopls = {
@@ -157,7 +155,6 @@ return {
           },
           html = {},
           jsonls = {},
-          kotlin_language_server = {},
           lua_ls = { settings = { Lua = { hint = { enable = true }, workspace = { checkThirdParty = 'Disable' } } } },
           nil_ls = {},
           pyright = {},
@@ -184,7 +181,6 @@ return {
             },
           },
           tailwindcss = {},
-          templ = {},
           terraformls = {},
           ts_ls = {
             settings = { typescript = { ts_ls_inlayhint_config }, javascript = { ts_ls_inlayhint_config } },
@@ -223,7 +219,6 @@ return {
         nix = { 'alejandra' },
         python = { 'ruff' },
         rust = { 'rustfmt' },
-        templ = { 'templ' },
         terraform = { 'tofu_fmt', 'terraform_fmt', stop_after_first = true },
         typescript = { 'biome', 'prettierd', 'deno', 'prettier', stop_after_first = true },
         yaml = { 'prettier' },
