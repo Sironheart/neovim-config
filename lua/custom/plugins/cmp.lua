@@ -25,6 +25,20 @@ return {
         -- Needs to be added, to allow the usage of Github Copilot on <C-y>
         ['<C-y>'] = { 'select_and_accept', 'fallback' },
       },
+      fuzzy = {
+        sorts = {
+          function(a, b)
+            if (a.client_name == nil or b.client_name == nil) or (a.client_name == b.client_name) then
+              return
+            end
+            return b.client_name == 'emmet_ls'
+          end,
+          'exact',
+          -- defaults
+          'score',
+          'sort_text',
+        },
+      },
       sources = {
         providers = {
           snippets = {

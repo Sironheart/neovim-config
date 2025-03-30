@@ -24,33 +24,28 @@ return {
     {
       '<leader>sf',
       function()
-        local snacks = require 'snacks'
-        local output = vim.fn.system 'git rev-parse --is-inside-work-tree 2>/dev/null'
-
-        if vim.v.shell_error == 0 and output:match 'true' ~= nil then
-          snacks.picker.git_files { untracked = true }
-        else
-          snacks.picker.files { hidden = true }
-        end
+        require('snacks').picker.files {
+          hidden = true,
+          exclude = {
+            '.git',
+            'node_modules',
+            'vendor',
+            'target',
+            '\\.lock',
+          },
+        }
       end,
       desc = 'Find Files',
     },
     {
       '<leader>sg',
       function()
-        local snacks = require 'snacks'
-        local output = vim.fn.system 'git rev-parse --is-inside-work-tree 2>/dev/null'
-
-        if vim.v.shell_error == 0 and output:match 'true' ~= nil then
-          snacks.picker.git_grep {}
-        else
-          snacks.picker.grep {
-            exclude = {
-              'node_modules',
-              '\\.lock',
-            },
-          }
-        end
+        require('snacks').picker.grep {
+          exclude = {
+            'node_modules',
+            '\\.lock',
+          },
+        }
       end,
       desc = 'Search Grep',
     },
