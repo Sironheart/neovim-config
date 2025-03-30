@@ -5,7 +5,7 @@ return {
     dependencies = {
       'rafamadriz/friendly-snippets',
     },
-    version = 'v0.*',
+    version = 'v1.*',
     opts = {
       keymap = {
         preset = 'default',
@@ -25,9 +25,45 @@ return {
         -- Needs to be added, to allow the usage of Github Copilot on <C-y>
         ['<C-y>'] = { 'select_and_accept', 'fallback' },
       },
+      sources = {
+        providers = {
+          snippets = {
+            should_show_items = function(ctx)
+              return ctx.trigger.initial_kind ~= 'trigger_character'
+            end,
+          },
+        },
+      },
+      appearance = {
+        nerd_font_variant = 'mono',
+      },
       completion = {
         documentation = {
           auto_show = true,
+        },
+        menu = {
+          draw = {
+            components = {
+              kind_icon = {
+                text = function(ctx)
+                  local kind_icon, _, _ = require('mini.icons').get('lsp', ctx.kind)
+                  return kind_icon
+                end,
+                -- (optional) use highlights from mini.icons
+                highlight = function(ctx)
+                  local _, hl, _ = require('mini.icons').get('lsp', ctx.kind)
+                  return hl
+                end,
+              },
+              kind = {
+                -- (optional) use highlights from mini.icons
+                highlight = function(ctx)
+                  local _, hl, _ = require('mini.icons').get('lsp', ctx.kind)
+                  return hl
+                end,
+              },
+            },
+          },
         },
       },
     },

@@ -2,6 +2,7 @@ vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
 vim.g.have_nerd_font = true
+vim.o.winborder = 'rounded'
 
 -- Make line numbers default
 vim.opt.number = true

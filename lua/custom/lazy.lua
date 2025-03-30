@@ -13,6 +13,7 @@ require('lazy').setup {
   spec = {
     { import = 'custom.plugins' },
     { import = 'custom.plugins.folke' },
+    { import = 'custom.plugins.language-specific' },
   },
   ui = {
     icons = vim.g.have_nerd_font and {} or {

@@ -1,12 +1,6 @@
 return {
   {
     {
-      'MysticalDevil/inlay-hints.nvim',
-      event = 'LspAttach',
-      dependencies = { 'neovim/nvim-lspconfig' },
-      opts = {},
-    },
-    {
       -- Main LSP Configuration
       'neovim/nvim-lspconfig',
       dependencies = {
@@ -58,7 +52,7 @@ return {
             map('gD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
 
             local client = vim.lsp.get_client_by_id(event.data.client_id)
-            if client and client.supports_method(vim.lsp.protocol.Methods.textDocument_documentHighlight) then
+            if client and client:supports_method(vim.lsp.protocol.Methods.textDocument_documentHighlight) then
               local highlight_augroup = vim.api.nvim_create_augroup('kickstart-lsp-highlight', { clear = false })
               vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
                 buffer = event.buf,
@@ -112,9 +106,6 @@ return {
             includeInlayVariableTypeHintsWhenTypeMatchesName = true,
           },
         }
-
-        local capabilities = vim.lsp.protocol.make_client_capabilities()
-        capabilities = require('blink.cmp').get_lsp_capabilities(capabilities)
 
         local servers = {
           astro = {},
@@ -196,6 +187,12 @@ return {
 
         for server, config in pairs(servers) do
           config.capabilities = blink.get_lsp_capabilities(config.capabilities)
+          -- enable inlay hints when available
+          config.on_attach = function(client, bufnr)
+            if client.server_capabilities.inlayHintProvider then
+              vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
+            end
+          end
           lspconfig[server].setup(config)
         end
       end,
