@@ -3,6 +3,7 @@ vim.g.maplocalleader = ' '
 
 vim.g.have_nerd_font = true
 vim.o.winborder = 'rounded'
+vim.o.background = 'dark'
 
 -- Make line numbers default
 vim.opt.number = true
