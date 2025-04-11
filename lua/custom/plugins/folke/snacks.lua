@@ -1,3 +1,11 @@
+local excludes = {
+  '.git',
+  'node_modules',
+  'vendor',
+  'target',
+  '\\.lock',
+}
+
 return {
 
   'folke/snacks.nvim',
@@ -24,28 +32,34 @@ return {
     {
       '<leader>sf',
       function()
-        require('snacks').picker.files {
+        local snacks = require 'snacks'
+        local opts = {
           hidden = true,
-          exclude = {
-            '.git',
-            'node_modules',
-            'vendor',
-            'target',
-            '\\.lock',
-          },
+          exclude = excludes,
         }
+
+        if snacks.git.get_root(vim.uv.cwd()) then
+          snacks.picker.git_files(opts)
+        else
+          snacks.picker.files(opts)
+        end
       end,
       desc = 'Find Files',
     },
     {
       '<leader>sg',
       function()
-        require('snacks').picker.grep {
-          exclude = {
-            'node_modules',
-            '\\.lock',
-          },
+        local snacks = require 'snacks'
+        local opts = {
+          hidden = true,
+          exclude = excludes,
         }
+
+        if snacks.git.get_root(vim.uv.cwd()) then
+          snacks.picker.git_grep(opts)
+        else
+          snacks.picker.grep(opts)
+        end
       end,
       desc = 'Search Grep',
     },
