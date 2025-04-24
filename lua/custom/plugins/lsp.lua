@@ -16,6 +16,7 @@ return {
         'saghen/blink.cmp',
       },
       config = function()
+        vim.lsp.set_log_level 'off'
         vim.api.nvim_create_autocmd('LspAttach', {
           group = vim.api.nvim_create_augroup('kickstart-lsp-attach', { clear = true }),
           callback = function(event)
@@ -24,35 +25,16 @@ return {
             end
 
             map('gd', require('snacks').picker.lsp_definitions, '[G]oto [D]efinition')
-
-            map('gvd', function()
-              require('telescope.builtin').lsp_definitions { jump_type = 'vsplit' }
-            end, '[G]oto [D]efinition')
-
-            map('gr', function()
-              require('snacks').picker.lsp_references { jump_type = true }
-            end, '[G]oto [R]eferences')
-
+            map('gr', require('snacks').picker.lsp_references, '[G]oto [R]eferences')
             map('gI', require('snacks').picker.lsp_implementations, '[G]oto [I]mplementation')
-
-            map('gvI', function()
-              require('snacks').picker.lsp_implementations { jump_type = 'vsplit' }
-            end, '[G]oto [I]mplementation')
-
-            map('<leader>D', function()
-              require('snacks').picker.lsp_type_definitions()
-            end, 'Type [D]efinition')
-
+            map('<leader>D', require('snacks').picker.lsp_type_definitions, 'Type [D]efinition')
             map('<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame')
-
             map('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction')
-
             map('K', vim.lsp.buf.hover, 'Hover Documentation')
-
             map('gD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
 
             local client = vim.lsp.get_client_by_id(event.data.client_id)
-            if client and client:supports_method(vim.lsp.protocol.Methods.textDocument_documentHighlight) then
+            if client and client:supports_method(vim.lsp.protocol.Methods.textDocument_documentHighlight, event.buf) then
               local highlight_augroup = vim.api.nvim_create_augroup('kickstart-lsp-highlight', { clear = false })
               vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
                 buffer = event.buf,
@@ -74,13 +56,47 @@ return {
                 end,
               })
             end
+
+            if client and client:supports_method(vim.lsp.protocol.Methods.textDocument_inlayHint, event.buf) then
+              map('<leader>th', function()
+                vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled { bufnr = event.buf })
+              end, '[T]oggle Inlay [H]ints')
+            end
           end,
         })
+
+        vim.diagnostic.config {
+          severity_sort = true,
+          float = { border = 'rounded', source = 'if_many' },
+          underline = { severity = vim.diagnostic.severity.ERROR },
+          signs = vim.g.have_nerd_font and {
+            text = {
+              [vim.diagnostic.severity.ERROR] = '󰅚 ',
+              [vim.diagnostic.severity.WARN] = '󰀪 ',
+              [vim.diagnostic.severity.INFO] = '󰋽 ',
+              [vim.diagnostic.severity.HINT] = '󰌶 ',
+            },
+          } or {},
+          virtual_text = {
+            source = 'if_many',
+            spacing = 2,
+            format = function(diagnostic)
+              local diagnostic_message = {
+                [vim.diagnostic.severity.ERROR] = diagnostic.message,
+                [vim.diagnostic.severity.WARN] = diagnostic.message,
+                [vim.diagnostic.severity.INFO] = diagnostic.message,
+                [vim.diagnostic.severity.HINT] = diagnostic.message,
+              }
+              return diagnostic_message[diagnostic.severity]
+            end,
+          },
+        }
 
         require('mason').setup {
           PATH = 'append',
         }
         require('mason-lspconfig').setup {
+          automatic_enable = false,
           automatic_installation = false,
           ensure_installed = {
             'astro',
@@ -92,7 +108,6 @@ return {
             'lua_ls',
             'terraformls',
             'ts_ls',
-            'volar',
             'yamlls',
           },
         }
@@ -146,6 +161,7 @@ return {
           },
           html = {},
           jsonls = {},
+          kotlin_lsp = {},
           lua_ls = { settings = { Lua = { hint = { enable = true }, workspace = { checkThirdParty = 'Disable' } } } },
           nil_ls = {},
           pyright = {},
@@ -178,7 +194,7 @@ return {
             root_dir = require('lspconfig.util').root_pattern('tsconfig.json', 'tsconfig.json', 'jsconfig.json'),
             single_file_support = false,
           },
-          volar = { init_options = { vue = { hybridMode = false } } },
+          -- vue_ls = { init_options = { vue = { hybridMode = false } } },
           yamlls = {},
         }
 
@@ -188,11 +204,11 @@ return {
         for server, config in pairs(servers) do
           config.capabilities = blink.get_lsp_capabilities(config.capabilities)
           -- enable inlay hints when available
-          config.on_attach = function(client, bufnr)
-            if client.server_capabilities.inlayHintProvider then
-              vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
-            end
-          end
+          -- config.on_attach = function(client, bufnr)
+          --   if client.server_capabilities.inlayHintProvider then
+          --     vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
+          --   end
+          -- end
           lspconfig[server].setup(config)
         end
       end,
