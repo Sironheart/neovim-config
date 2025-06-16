@@ -5,8 +5,9 @@ return {
       'neovim/nvim-lspconfig',
       dependencies = {
         -- Automatically install LSPs and related tools to stdpath for Neovim
-        { 'williamboman/mason.nvim', config = true }, -- NOTE: Must be loaded before dependants
+        { 'williamboman/mason.nvim', opts = {} },
         'williamboman/mason-lspconfig.nvim',
+        'WhoIsSethDaniel/mason-tool-installer.nvim',
 
         -- Useful status updates for LSP.
         -- NOTE: `opts = {}` is the same as calling `require('fidget').setup({})`
@@ -92,26 +93,6 @@ return {
           },
         }
 
-        require('mason').setup {
-          PATH = 'append',
-        }
-        require('mason-lspconfig').setup {
-          automatic_enable = false,
-          automatic_installation = false,
-          ensure_installed = {
-            'astro',
-            'cssls',
-            'emmet_ls',
-            'gopls',
-            'html',
-            'jsonls',
-            'lua_ls',
-            'terraformls',
-            'ts_ls',
-            'yamlls',
-          },
-        }
-
         local ts_ls_inlayhint_config = {
           inlayHints = {
             includeInlayEnumMemberValueHints = true,
@@ -125,24 +106,10 @@ return {
         local servers = {
           astro = {},
           cssls = {},
-          denols = {
-            settings = {
-              deno = {
-                inlayHints = {
-                  enumMemberValues = { enabled = true },
-                  parameterNames = { enabled = 'all', suppressWhenArgumentMatchesName = true },
-                  propertyDeclarationTypes = { enabled = true },
-                  variableTypes = { enabled = true, suppressWhenTypeMatchesName = true },
-                },
-              },
-            },
-            root_dir = require('lspconfig.util').root_pattern('deno.json', 'deno.jsonc'),
-            single_file_support = false,
-          },
           docker_compose_language_service = {},
           dockerls = {},
           emmet_ls = { options = { ['jsx.enabled'] = true } },
-          gleam = {},
+          -- gleam = {},
           gopls = {
             settings = {
               gopls = {
@@ -161,13 +128,31 @@ return {
           },
           html = {},
           jsonls = {},
-          kotlin_lsp = {},
-          lua_ls = { settings = { Lua = { hint = { enable = true }, workspace = { checkThirdParty = 'Disable' } } } },
-          nil_ls = {},
+          -- kotlin_lsp = {},
+          lua_ls = { settings = { Lua = { workspace = { checkThirdParty = 'Disable' } } } },
+          phpactor = {
+            init_options = {
+              ['language_server_phpstan.enabled'] = false,
+              ['language_server_psalm.enabled'] = false,
+            },
+          },
           pyright = {},
           rust_analyzer = {
             settings = {
               ['rust-analyzer'] = {
+                cargo = {
+                  buildScripts = {
+                    enable = true,
+                  },
+                },
+                diagnostics = {
+                  styleLints = {
+                    enable = true,
+                  },
+                },
+                procMacro = {
+                  enable = true,
+                },
                 inlayHints = {
                   bindingModeHints = { enable = false },
                   chainingHints = { enable = true },
@@ -191,26 +176,47 @@ return {
           terraformls = {},
           ts_ls = {
             settings = { typescript = { ts_ls_inlayhint_config }, javascript = { ts_ls_inlayhint_config } },
-            root_dir = require('lspconfig.util').root_pattern('tsconfig.json', 'tsconfig.json', 'jsconfig.json'),
             single_file_support = false,
+          },
+          twiggy_language_server = {
+            settings = {
+              twiggy = {
+                framework = 'symfony',
+                phpExecutable = 'php',
+                symfonyConsolePath = 'bin/console',
+              },
+            },
           },
           -- vue_ls = { init_options = { vue = { hybridMode = false } } },
           yamlls = {},
         }
 
-        local lspconfig = require 'lspconfig'
-        local blink = require 'blink.cmp'
+        local capabilities = require('blink.cmp').get_lsp_capabilities()
 
-        for server, config in pairs(servers) do
-          config.capabilities = blink.get_lsp_capabilities(config.capabilities)
-          -- enable inlay hints when available
-          -- config.on_attach = function(client, bufnr)
-          --   if client.server_capabilities.inlayHintProvider then
-          --     vim.lsp.inlay_hint.enable(true, { bufnr = bufnr })
-          --   end
-          -- end
-          lspconfig[server].setup(config)
-        end
+        local ensure_installed = vim.tbl_keys(servers or {})
+        vim.list_extend(ensure_installed, {
+          'stylua', -- Used to format Lua code
+        })
+
+        require('mason-tool-installer').setup {
+          ensure_installed = ensure_installed,
+        }
+
+        require('mason-lspconfig').setup {
+          automatic_enable = true,
+          ensure_installed = {},
+          handlers = {
+            function(server_name)
+              local server = servers[server_name] or {}
+              -- This handles overriding only values explicitly passed
+              -- by the server configuration above. Useful when disabling
+              -- certain features of an LSP (for example, turning off formatting for ts_ls)
+              server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
+              vim.lsp.config(server_name, server.config or {})
+              -- require('lspconfig')[server_name].setup(server)
+            end,
+          },
+        }
       end,
     },
   },
@@ -224,15 +230,15 @@ return {
         cue = { 'cuefmt' },
         elixir = { 'mix' },
         go = { 'goimports', 'gofmt' },
-        javascript = { 'biome', 'prettierd', 'deno', 'prettier', stop_after_first = true },
+        javascript = { 'biome', 'prettierd', 'prettier', stop_after_first = true },
         json = { 'jq' },
         just = { 'just' },
         lua = { 'stylua' },
-        nix = { 'alejandra' },
+        php = { 'php_cs_fixer' },
         python = { 'ruff' },
         rust = { 'rustfmt' },
         terraform = { 'tofu_fmt', 'terraform_fmt', stop_after_first = true },
-        typescript = { 'biome', 'prettierd', 'deno', 'prettier', stop_after_first = true },
+        typescript = { 'biome', 'prettierd', 'prettier', stop_after_first = true },
       },
       format_on_save = {
         timeout_ms = 500,
