@@ -36,6 +36,7 @@ return {
           cmd = 'rg',
           hidden = true,
           exclude = excludes,
+          ignored = true,
         }
       end,
       desc = 'Find Files',
@@ -47,6 +48,7 @@ return {
           cmd = 'rg',
           hidden = true,
           exclude = excludes,
+          ignored = true,
         }
       end,
       desc = 'Search Grep',

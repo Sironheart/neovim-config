@@ -227,10 +227,9 @@ return {
     opts = {
       formatters_by_ft = {
         ['_'] = { 'prettier' },
-        cue = { 'cuefmt' },
         elixir = { 'mix' },
         go = { 'goimports', 'gofmt' },
-        javascript = { 'biome', 'prettierd', 'prettier', stop_after_first = true },
+        javascript = { 'biome', 'prettier', stop_after_first = true },
         json = { 'jq' },
         just = { 'just' },
         lua = { 'stylua' },
@@ -238,7 +237,7 @@ return {
         python = { 'ruff' },
         rust = { 'rustfmt' },
         terraform = { 'tofu_fmt', 'terraform_fmt', stop_after_first = true },
-        typescript = { 'biome', 'prettierd', 'prettier', stop_after_first = true },
+        typescript = { 'biome', 'prettier', stop_after_first = true },
       },
       format_on_save = {
         timeout_ms = 500,
