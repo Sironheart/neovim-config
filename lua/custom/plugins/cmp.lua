@@ -21,10 +21,8 @@ return {
         --
         -- ['<Tab>'] = { 'snippet_forward', 'fallback' },
         -- ['<S-Tab>'] = { 'snippet_backward', 'fallback' },
-
-        -- Needs to be added, to allow the usage of Github Copilot on <C-y>
-        ['<C-y>'] = { 'select_and_accept', 'fallback' },
       },
+      signature = { enabled = true },
       fuzzy = {
         sorts = {
           function(a, b)
@@ -54,30 +52,6 @@ return {
       completion = {
         documentation = {
           auto_show = true,
-        },
-        menu = {
-          draw = {
-            components = {
-              kind_icon = {
-                text = function(ctx)
-                  local kind_icon, _, _ = require('mini.icons').get('lsp', ctx.kind)
-                  return kind_icon
-                end,
-                -- (optional) use highlights from mini.icons
-                highlight = function(ctx)
-                  local _, hl, _ = require('mini.icons').get('lsp', ctx.kind)
-                  return hl
-                end,
-              },
-              kind = {
-                -- (optional) use highlights from mini.icons
-                highlight = function(ctx)
-                  local _, hl, _ = require('mini.icons').get('lsp', ctx.kind)
-                  return hl
-                end,
-              },
-            },
-          },
         },
       },
     },
