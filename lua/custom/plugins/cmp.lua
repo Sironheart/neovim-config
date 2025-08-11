@@ -23,31 +23,8 @@ return {
         -- ['<S-Tab>'] = { 'snippet_backward', 'fallback' },
       },
       signature = { enabled = true },
-      fuzzy = {
-        sorts = {
-          function(a, b)
-            if (a.client_name == nil or b.client_name == nil) or (a.client_name == b.client_name) then
-              return
-            end
-            return b.client_name == 'emmet_ls'
-          end,
-          'exact',
-          -- defaults
-          'score',
-          'sort_text',
-        },
-      },
       sources = {
-        providers = {
-          snippets = {
-            should_show_items = function(ctx)
-              return ctx.trigger.initial_kind ~= 'trigger_character'
-            end,
-          },
-        },
-      },
-      appearance = {
-        nerd_font_variant = 'mono',
+        default = { 'lsp', 'path' },
       },
       completion = {
         documentation = {

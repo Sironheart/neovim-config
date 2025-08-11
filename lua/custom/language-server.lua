@@ -8,8 +8,6 @@ M.docker_compose_language_service = {}
 
 M.dockerls = {}
 
-M.emmet_ls = { options = { ['jsx.enabled'] = true } }
-
 M.gleam = {}
 
 M.gopls = {
