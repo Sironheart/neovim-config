@@ -1,4 +1,4 @@
-function indexOf(array, value)
+local function indexOf(array, value)
   for i, v in ipairs(array) do
     if v == value then
       return i
@@ -9,10 +9,11 @@ end
 
 return {
   {
-    'aaronshifman/auto-k8s.nvim',
-    dependencies = {
-      'neovim/nvim-lspconfig',
-    },
+    'anasinnyk/nvim-k8s-crd',
+    lazy = true,
+    event = { 'BufEnter *.yaml' },
+    cmd = { 'K8SSchemasGenerate' },
+    dependencies = { 'neovim/nvim-lspconfig' },
     opts = {},
   },
   {
