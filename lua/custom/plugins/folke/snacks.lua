@@ -4,6 +4,7 @@ local excludes = {
   '**/var/cache',
   '**/var/logs',
   '**/dist-types/',
+  '.venv',
   '.elixir_ls',
   '.git',
   '.gradle',
