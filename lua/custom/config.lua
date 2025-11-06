@@ -100,3 +100,6 @@ local get_option = vim.filetype.get_option
 vim.filetype.get_option = function(filetype, option)
   return option == 'commentstring' and require('ts_context_commentstring.internal').calculate_commentstring() or get_option(filetype, option)
 end
+
+-- Prepend mise shims to PATH
+vim.env.PATH = vim.env.HOME .. '/.local/share/mise/shims:' .. vim.env.PATH
