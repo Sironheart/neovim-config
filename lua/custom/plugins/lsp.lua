@@ -1,20 +1,59 @@
-local function indexOf(array, value)
-  for i, v in ipairs(array) do
-    if v == value then
-      return i
-    end
-  end
-  return nil
-end
-
 return {
   {
-    'anasinnyk/nvim-k8s-crd',
-    lazy = true,
-    event = { 'BufEnter *.yaml' },
-    cmd = { 'K8SSchemasGenerate' },
-    dependencies = { 'neovim/nvim-lspconfig' },
-    opts = {},
+    'mosheavni/yaml-companion.nvim',
+    opts = {
+      builtin_matchers = {
+        kubernetes = { enabled = true },
+        cloud_init = { enabled = true },
+      },
+
+      cluster_crds = {
+        enabled = true,
+        fallback = true,
+      },
+    },
+    config = function(_, opts)
+      local cfg = require('yaml-companion').setup(opts)
+      vim.lsp.config('yamlls', cfg)
+    end,
+  },
+  {
+    'junnplus/lsp-setup.nvim',
+    dependencies = {
+      'neovim/nvim-lspconfig',
+      'mason-org/mason.nvim', -- optional
+      'mason-org/mason-lspconfig.nvim', -- optional
+
+      'saghen/blink.cmp',
+      'folke/snacks.nvim',
+    },
+    opts = {
+      servers = require 'custom.language-server',
+      inlay_hints = { enabled = true },
+      capabilities = require('blink.cmp').get_lsp_capabilities(),
+      default_mappings = false,
+      mappings = {
+        gd = 'lua require"snacks".picker.lsp_definitions()',
+        gr = 'lua require"snacks".picker.lsp_references()',
+        gI = 'lua require"snacks".picker.lsp_implementations()',
+        D = 'lua require"snacks".picker.lsp_type_definitions()',
+        K = { cmd = vim.lsp.buf.hover, opts = { desc = 'Hover Documentation' } },
+        ['<space>rn'] = { cmd = vim.lsp.buf.rename, opts = { desc = 'Rename' } },
+        ['<space>ca'] = { cmd = vim.lsp.buf.code_action, opts = { desc = 'Code Action' } },
+        ['[d'] = {
+          cmd = function()
+            vim.diagnostic.jump { count = -1, float = true }
+          end,
+          opts = { desc = 'Prev Diagnostic' },
+        },
+        [']d'] = {
+          cmd = function()
+            vim.diagnostic.jump { count = 1, float = true }
+          end,
+          opts = { desc = 'Next Diagnostic' },
+        },
+      },
+    },
   },
   {
     -- Main LSP Configuration
@@ -33,55 +72,6 @@ return {
       'saghen/blink.cmp',
     },
     config = function()
-      vim.lsp.set_log_level 'off'
-      vim.api.nvim_create_autocmd('LspAttach', {
-        group = vim.api.nvim_create_augroup('kickstart-lsp-attach', { clear = true }),
-        callback = function(event)
-          local map = function(keys, func, desc)
-            vim.keymap.set('n', keys, func, { buffer = event.buf, desc = 'LSP: ' .. desc })
-          end
-
-          map('gd', require('snacks').picker.lsp_definitions, '[G]oto [D]efinition')
-          map('gr', require('snacks').picker.lsp_references, '[G]oto [R]eferences')
-          map('gI', require('snacks').picker.lsp_implementations, '[G]oto [I]mplementation')
-          map('<leader>D', require('snacks').picker.lsp_type_definitions, 'Type [D]efinition')
-          map('<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame')
-          map('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction')
-          map('K', vim.lsp.buf.hover, 'Hover Documentation')
-          map('gD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
-
-          local client = vim.lsp.get_client_by_id(event.data.client_id)
-          if client and client:supports_method(vim.lsp.protocol.Methods.textDocument_documentHighlight, event.buf) then
-            local highlight_augroup = vim.api.nvim_create_augroup('kickstart-lsp-highlight', { clear = false })
-            vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
-              buffer = event.buf,
-              group = highlight_augroup,
-              callback = vim.lsp.buf.document_highlight,
-            })
-
-            vim.api.nvim_create_autocmd({ 'CursorMoved', 'CursorMovedI' }, {
-              buffer = event.buf,
-              group = highlight_augroup,
-              callback = vim.lsp.buf.clear_references,
-            })
-
-            vim.api.nvim_create_autocmd('LspDetach', {
-              group = vim.api.nvim_create_augroup('kickstart-lsp-detach', { clear = true }),
-              callback = function(event2)
-                vim.lsp.buf.clear_references()
-                vim.api.nvim_clear_autocmds { group = 'kickstart-lsp-highlight', buffer = event2.buf }
-              end,
-            })
-          end
-
-          if client and client:supports_method(vim.lsp.protocol.Methods.textDocument_inlayHint, event.buf) then
-            map('<leader>th', function()
-              vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled { bufnr = event.buf })
-            end, '[T]oggle Inlay [H]ints')
-          end
-        end,
-      })
-
       vim.diagnostic.config {
         severity_sort = true,
         float = { border = 'rounded', source = 'if_many' },
@@ -105,41 +95,6 @@ return {
               [vim.diagnostic.severity.HINT] = diagnostic.message,
             }
             return diagnostic_message[diagnostic.severity]
-          end,
-        },
-      }
-
-      local servers = require 'custom.language-server'
-
-      local capabilities = require('blink.cmp').get_lsp_capabilities()
-
-      local ignore_install = { 'gleam' }
-      local ensure_installed = vim.tbl_keys(servers or {})
-
-      for _, v in pairs(ignore_install) do
-        table.remove(ensure_installed, indexOf(ensure_installed, v))
-      end
-
-      vim.list_extend(ensure_installed, {
-        'stylua', -- Used to format Lua code
-      })
-
-      require('mason-tool-installer').setup {
-        ensure_installed = ensure_installed,
-      }
-
-      require('mason-lspconfig').setup {
-        automatic_enable = true,
-        ensure_installed = {},
-        handlers = {
-          function(server_name)
-            local server = servers[server_name] or {}
-            -- This handles overriding only values explicitly passed
-            -- by the server configuration above. Useful when disabling
-            -- certain features of an LSP (for example, turning off formatting for ts_ls)
-            server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
-            vim.lsp.config(server_name, server.config or {})
-            -- require('lspconfig')[server_name].setup(server)
           end,
         },
       }

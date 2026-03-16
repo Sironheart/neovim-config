@@ -8,8 +8,6 @@ M.docker_compose_language_service = {}
 
 M.dockerls = {}
 
-M.gleam = {}
-
 M.gopls = {
   settings = {
     gopls = {
