@@ -33,7 +33,7 @@ return {
     indent = { enabled = true },
     input = { enabled = true },
     lazygit = { enabled = true },
-    notifier = { enabled = true },
+    notifier = { enabled = true, timeout = 5000 },
     picker = { enabled = true },
     scope = { enabled = true },
     statuscolumn = { enabled = true },
@@ -42,14 +42,14 @@ return {
     {
       '<leader>lg',
       function()
-        require('snacks').lazygit.open()
+        Snacks.lazygit()
       end,
       desc = 'Open lazygit',
     },
     {
       '<leader>sf',
       function()
-        require('snacks').picker.files {
+        Snacks.picker.files {
           cmd = 'rg',
           hidden = true,
           exclude = excludes,
@@ -61,7 +61,7 @@ return {
     {
       '<leader>sg',
       function()
-        require('snacks').picker.grep {
+        Snacks.picker.grep {
           cmd = 'rg',
           hidden = true,
           exclude = excludes,
@@ -73,28 +73,28 @@ return {
     {
       '<leader>sb',
       function()
-        require('snacks').picker.buffers()
+        Snacks.picker.buffers()
       end,
       desc = 'Search Buffers',
     },
     {
       '<leader>sr',
       function()
-        require('snacks').picker.resume()
+        Snacks.picker.resume()
       end,
       desc = 'Search Resume',
     },
     {
       '<leader>sk',
       function()
-        require('snacks').picker.keymaps()
+        Snacks.picker.keymaps()
       end,
       desc = 'Search Keymap',
     },
     {
       '<leader><space>',
       function()
-        require('snacks').picker.recent {
+        Snacks.picker.recent {
           filter = {
             paths = {
               [vim.fn.getcwd()] = true,
