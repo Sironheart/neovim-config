@@ -21,8 +21,6 @@ return {
     'junnplus/lsp-setup.nvim',
     dependencies = {
       'neovim/nvim-lspconfig',
-      'mason-org/mason.nvim', -- optional
-      'mason-org/mason-lspconfig.nvim', -- optional
 
       'saghen/blink.cmp',
       'folke/snacks.nvim',
@@ -61,12 +59,12 @@ return {
     dependencies = {
       -- Automatically install LSPs and related tools to stdpath for Neovim
       { 'williamboman/mason.nvim', opts = {} },
-      'williamboman/mason-lspconfig.nvim',
-      'WhoIsSethDaniel/mason-tool-installer.nvim',
+      -- { 'williamboman/mason-lspconfig.nvim', opts = { ensure_installed = {} } },
+      -- { 'WhoIsSethDaniel/mason-tool-installer.nvim', opts = { ensure_installed = {} } },
 
       -- Useful status updates for LSP.
       -- NOTE: `opts = {}` is the same as calling `require('fidget').setup({})`
-      { 'j-hui/fidget.nvim', opts = {} },
+      { 'j-hui/fidget.nvim',       opts = {} },
 
       -- For the capabilities
       'saghen/blink.cmp',
