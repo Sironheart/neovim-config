@@ -1,4 +1,8 @@
 [tools]
 node = "25.8.1"
-stylua = "latest"
+stylua = "2.4.0"
 tree-sitter = "0.26.7"
+
+[tasks.format]
+alias = "fmt"
+run = "stylua ./**.lua"

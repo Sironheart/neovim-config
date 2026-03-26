@@ -3,41 +3,39 @@ return {
     'junnplus/lsp-setup.nvim',
     event = { 'BufReadPre', 'BufNewFile' },
     dependencies = {
+      'sironheart/kube_yaml_schema.nvim',
       'neovim/nvim-lspconfig',
-      'kube-yaml-schema.nvim',
 
       'saghen/blink.cmp',
       'folke/snacks.nvim',
     },
-    opts = function()
-      return {
-        servers = require 'custom.language-server',
-        inlay_hints = { enabled = true },
-        capabilities = require('blink.cmp').get_lsp_capabilities(),
-        default_mappings = false,
-        mappings = {
-          gd = 'lua require"snacks".picker.lsp_definitions()',
-          gr = 'lua require"snacks".picker.lsp_references()',
-          gI = 'lua require"snacks".picker.lsp_implementations()',
-          D = 'lua require"snacks".picker.lsp_type_definitions()',
-          K = { cmd = vim.lsp.buf.hover, opts = { desc = 'Hover Documentation' } },
-          ['<space>rn'] = { cmd = vim.lsp.buf.rename, opts = { desc = 'Rename' } },
-          ['<space>ca'] = { cmd = vim.lsp.buf.code_action, opts = { desc = 'Code Action' } },
-          ['[d'] = {
-            cmd = function()
-              vim.diagnostic.jump { count = -1, float = true }
-            end,
-            opts = { desc = 'Prev Diagnostic' },
-          },
-          [']d'] = {
-            cmd = function()
-              vim.diagnostic.jump { count = 1, float = true }
-            end,
-            opts = { desc = 'Next Diagnostic' },
-          },
+    opts = {
+      servers = require 'custom.language-server',
+      inlay_hints = { enabled = true },
+      capabilities = require('blink.cmp').get_lsp_capabilities(),
+      default_mappings = false,
+      mappings = {
+        gd = 'lua require"snacks".picker.lsp_definitions()',
+        gr = 'lua require"snacks".picker.lsp_references()',
+        gI = 'lua require"snacks".picker.lsp_implementations()',
+        D = 'lua require"snacks".picker.lsp_type_definitions()',
+        K = { cmd = vim.lsp.buf.hover, opts = { desc = 'Hover Documentation' } },
+        ['<space>rn'] = { cmd = vim.lsp.buf.rename, opts = { desc = 'Rename' } },
+        ['<space>ca'] = { cmd = vim.lsp.buf.code_action, opts = { desc = 'Code Action' } },
+        ['[d'] = {
+          cmd = function()
+            vim.diagnostic.jump { count = -1, float = true }
+          end,
+          opts = { desc = 'Prev Diagnostic' },
         },
-      }
-    end,
+        [']d'] = {
+          cmd = function()
+            vim.diagnostic.jump { count = 1, float = true }
+          end,
+          opts = { desc = 'Next Diagnostic' },
+        },
+      },
+    },
   },
   {
     -- Main LSP Configuration
@@ -84,29 +82,31 @@ return {
   },
   {
     'stevearc/conform.nvim',
-    event = { 'BufWritePre' },
-    cmd = { 'ConformInfo' },
     opts = {
       formatters_by_ft = {
         ['_'] = { 'prettier' },
         elixir = { 'mix' },
         go = { 'goimports', 'gofmt' },
+        gleam = { 'gleam' },
         javascript = { 'biome', 'prettier', stop_after_first = true },
+        java = { 'palantir-java-format' },
         json = { 'jq' },
         just = { 'just' },
+        kotlin = { 'ktfmt' },
         lua = { 'stylua' },
         php = { 'php_cs_fixer' },
-        python = { 'ruff' },
+        python = { 'ruff_fix', 'ruff_format', 'ruff_organize_imports' },
         rust = { 'rustfmt' },
         terraform = { 'tofu_fmt', 'terraform_fmt', stop_after_first = true },
         toml = { 'taplo' },
         typescript = { 'biome', 'prettier', stop_after_first = true },
+        yaml = { 'yq' },
       },
       format_on_save = {
         timeout_ms = 500,
         lsp_format = 'fallback',
       },
-      notify_no_formatters = false,
+      notify_no_formatters = true,
     },
   },
 }

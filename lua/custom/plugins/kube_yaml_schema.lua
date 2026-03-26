@@ -1,20 +1,7 @@
 return {
   {
-    dir = vim.fn.stdpath 'config',
-    name = 'kube-yaml-schema.nvim',
-    main = 'kube_yaml_schema',
-    ft = {
-      'yaml',
-      'yaml.docker-compose',
-      'yaml.gitlab',
-      'yaml.helm-values',
-    },
-    cmd = {
-      'KubeYamlSchemaRefresh',
-      'KubeYamlSchemaRefreshAll',
-      'KubeYamlSchemaContext',
-      'KubeYamlSchemaClearCache',
-    },
+    'sironheart/kube_yaml_schema.nvim',
+    dir = vim.fs.normalize '~/projects/github.com/sironheart/kube_yaml_schema.nvim',
     opts = {
       auto_refresh = true,
       notify = true,

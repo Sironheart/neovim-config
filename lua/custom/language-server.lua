@@ -25,6 +25,8 @@ M.gopls = {
   completeUnimported = true,
 }
 
+M.gleam = {}
+
 M.html = {}
 
 M.jsonls = {}
