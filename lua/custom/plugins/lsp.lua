@@ -1,23 +1,5 @@
 return {
   {
-    'mosheavni/yaml-companion.nvim',
-    opts = {
-      builtin_matchers = {
-        kubernetes = { enabled = true },
-        cloud_init = { enabled = true },
-      },
-
-      cluster_crds = {
-        enabled = true,
-        fallback = true,
-      },
-    },
-    config = function(_, opts)
-      local cfg = require('yaml-companion').setup(opts)
-      vim.lsp.config('yamlls', cfg)
-    end,
-  },
-  {
     'junnplus/lsp-setup.nvim',
     dependencies = {
       'neovim/nvim-lspconfig',
@@ -25,6 +7,10 @@ return {
       'saghen/blink.cmp',
       'folke/snacks.nvim',
     },
+    config = function(_, opts)
+      require('kube_yaml_schema').setup()
+      require('lsp-setup').setup(opts)
+    end,
     opts = {
       servers = require 'custom.language-server',
       inlay_hints = { enabled = true },
