@@ -40,11 +40,6 @@ local function notify_resolution_result(opts, result, err, changed)
     return
   end
 
-  if reason == 'ambiguous-crd' then
-    util.notify(vim.log.levels.INFO, fallback_message(changed, 'Multiple CRD kinds detected'))
-    return
-  end
-
   util.notify(vim.log.levels.INFO, fallback_message(changed, 'No applicable cluster schema found'))
 end
 

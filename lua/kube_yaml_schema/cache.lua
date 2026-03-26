@@ -45,13 +45,13 @@ function M.context_crd_cache_path(context)
 end
 
 function M.schema_file_path(context, group, kind, version)
-  local filename = string.format(
-    '%s__%s__%s.json',
-    util.sanitize_filename(group),
-    util.sanitize_filename(kind),
-    util.sanitize_filename(version)
-  )
+  local filename = string.format('%s__%s__%s.json', util.sanitize_filename(group), util.sanitize_filename(kind), util.sanitize_filename(version))
   return util.path_join(M.context_cache_dir(context), 'schemas', filename)
+end
+
+function M.generated_schema_path(context, key)
+  local filename = util.sanitize_filename(key) .. '.json'
+  return util.path_join(M.context_cache_dir(context), 'generated', filename)
 end
 
 function M.read_json_file(path)
@@ -107,6 +107,20 @@ function M.persist_schema(context, group, kind, version, schema)
   end
 
   local path = M.schema_file_path(context, group, kind, version)
+  if not M.write_json_file(path, normalized) then
+    return nil
+  end
+
+  return 'file://' .. path
+end
+
+function M.persist_generated_schema(context, key, schema)
+  local normalized = normalize_schema(schema)
+  if not normalized then
+    return nil
+  end
+
+  local path = M.generated_schema_path(context, key)
   if not M.write_json_file(path, normalized) then
     return nil
   end

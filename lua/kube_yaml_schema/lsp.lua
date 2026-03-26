@@ -39,7 +39,7 @@ local function merge_schema_overrides(client, client_state)
 end
 
 function M.attached_yamlls_clients(bufnr)
-  return vim.lsp.get_clients({ bufnr = bufnr, name = 'yamlls' })
+  return vim.lsp.get_clients { bufnr = bufnr, name = 'yamlls' }
 end
 
 function M.ensure_client_state(client)

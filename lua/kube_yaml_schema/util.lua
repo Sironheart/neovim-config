@@ -24,7 +24,7 @@ end
 
 function M.is_yaml_filetype(bufnr)
   local filetype = vim.bo[bufnr].filetype
-  return filetype == 'yaml' or filetype:match('^yaml') ~= nil
+  return filetype == 'yaml' or filetype:match '^yaml' ~= nil
 end
 
 return M

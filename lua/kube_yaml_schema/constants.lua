@@ -25,7 +25,7 @@ M.defaults = {
   kubectl_timeout_ms = 5000,
   cache_ttl_seconds = 300,
   context_cache_ttl_seconds = 10,
-  cache_dir = vim.fn.stdpath('cache') .. '/kube-yaml-schema',
+  cache_dir = vim.fn.stdpath 'cache' .. '/kube-yaml-schema',
   schema_store_url = 'https://www.schemastore.org/api/json/catalog.json',
   notify = true,
 }

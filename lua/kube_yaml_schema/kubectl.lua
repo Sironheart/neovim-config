@@ -38,7 +38,7 @@ local function parse_server_version(output)
     return nil
   end
 
-  local version = git_version:match('^v%d+%.%d+%.%d+')
+  local version = git_version:match '^v%d+%.%d+%.%d+'
   if version then
     return version
   end

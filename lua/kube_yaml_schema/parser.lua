@@ -33,7 +33,7 @@ function M.parse_api_version(api_version)
     return '', ''
   end
 
-  local group, version = api_version:match('^([^/]+)/(.+)$')
+  local group, version = api_version:match '^([^/]+)/(.+)$'
   if group and version then
     return group, version
   end
@@ -62,15 +62,15 @@ function M.parse_kubernetes_resources(bufnr)
   end
 
   for _, line in ipairs(lines) do
-    if line:match('^%s*%-%-%-%s*$') then
+    if line:match '^%s*%-%-%-%s*$' then
       flush_resource()
     else
-      local kind = parse_value(line:match('^%s*kind%s*:%s*(.-)%s*$'))
+      local kind = parse_value(line:match '^%s*kind%s*:%s*(.-)%s*$')
       if kind then
         current.kind = kind
       end
 
-      local api_version = parse_value(line:match('^%s*apiVersion%s*:%s*(.-)%s*$'))
+      local api_version = parse_value(line:match '^%s*apiVersion%s*:%s*(.-)%s*$')
       if api_version then
         current.api_version = api_version
       end

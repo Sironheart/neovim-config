@@ -5,27 +5,102 @@ local parser = require 'kube_yaml_schema.parser'
 local M = {}
 
 local function kubernetes_schema_uri(version)
-  return string.format(
-    'https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/%s-standalone-strict/all.json',
-    version
-  )
+  return string.format('https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/%s-standalone-strict/all.json', version)
 end
 
-local function dedupe_non_core_resources(resources)
+local function api_version(resource)
+  if resource.group == '' then
+    return resource.version
+  end
+
+  return string.format('%s/%s', resource.group, resource.version)
+end
+
+local function resource_key(resource)
+  return string.lower(api_version(resource) .. '|' .. resource.kind)
+end
+
+local function resource_sort(a, b)
+  local a_api_version = api_version(a)
+  local b_api_version = api_version(b)
+
+  if a_api_version == b_api_version then
+    return a.kind < b.kind
+  end
+
+  return a_api_version < b_api_version
+end
+
+local function dedupe_resources(resources)
   local unique = {}
 
   for _, resource in ipairs(resources) do
-    if not resource.core then
-      local key = string.lower(resource.group .. '|' .. resource.kind)
-      unique[key] = resource
+    unique[resource_key(resource)] = resource
+  end
+
+  local deduped = vim.tbl_values(unique)
+  table.sort(deduped, resource_sort)
+  return deduped
+end
+
+local function schema_rule(resource, uri)
+  return {
+    ['if'] = {
+      type = 'object',
+      properties = {
+        apiVersion = { const = api_version(resource) },
+        kind = { const = resource.kind },
+      },
+      required = { 'apiVersion', 'kind' },
+    },
+    ['then'] = {
+      ['$ref'] = uri,
+    },
+  }
+end
+
+local function compose_schema(entries)
+  table.sort(entries, function(a, b)
+    if a.rule_key == b.rule_key then
+      return a.uri < b.uri
+    end
+
+    return a.rule_key < b.rule_key
+  end)
+
+  local rules = {}
+  local signature = {}
+
+  for _, entry in ipairs(entries) do
+    table.insert(rules, schema_rule(entry.resource, entry.uri))
+    table.insert(signature, {
+      key = entry.rule_key,
+      uri = entry.uri,
+    })
+  end
+
+  local hash = vim.fn.sha256(vim.json.encode(signature))
+  local cache_key = 'composed-' .. hash
+  local schema = {
+    ['$schema'] = 'http://json-schema.org/draft-07/schema#',
+    allOf = rules,
+  }
+
+  return cache_key, schema
+end
+
+local function append_unique(list, value)
+  for _, item in ipairs(list) do
+    if item == value then
+      return
     end
   end
 
-  return vim.tbl_values(unique)
+  table.insert(list, value)
 end
 
 function M.resolve_for_buffer(bufnr, callback)
-  local resources = parser.parse_kubernetes_resources(bufnr)
+  local resources = dedupe_resources(parser.parse_kubernetes_resources(bufnr))
   if #resources == 0 then
     callback({ reason = 'no-kubernetes-resource' }, nil)
     return
@@ -37,64 +112,123 @@ function M.resolve_for_buffer(bufnr, callback)
       return
     end
 
-    local non_core = dedupe_non_core_resources(resources)
-    if #non_core == 0 then
-      kubectl.get_server_version(context, function(version, version_err)
-        if not version then
-          callback({ reason = 'core-version-unavailable' }, version_err)
+    local core_count = 0
+    local non_core_count = 0
+    for _, resource in ipairs(resources) do
+      if resource.core then
+        core_count = core_count + 1
+      else
+        non_core_count = non_core_count + 1
+      end
+    end
+
+    local function with_server_version(next)
+      if core_count == 0 then
+        next(nil, nil)
+        return
+      end
+
+      kubectl.get_server_version(context, next)
+    end
+
+    local function with_crd_index(next)
+      if non_core_count == 0 then
+        next(nil, nil)
+        return
+      end
+
+      kubectl.get_crd_index(context, next)
+    end
+
+    with_server_version(function(version, version_err)
+      with_crd_index(function(index, crd_err)
+        local entries = {}
+        local errors = {}
+
+        if version_err then
+          append_unique(errors, version_err)
+        end
+
+        if crd_err then
+          append_unique(errors, crd_err)
+        end
+
+        for _, resource in ipairs(resources) do
+          if resource.core then
+            if version then
+              table.insert(entries, {
+                rule_key = resource_key(resource),
+                resource = resource,
+                uri = kubernetes_schema_uri(version),
+                name = 'Kubernetes ' .. version,
+              })
+            end
+          elseif index and index.by_key then
+            local key = string.lower(resource.group .. '|' .. resource.kind)
+            local crd_entry = index.by_key[key]
+
+            if crd_entry then
+              local schema_body, schema_version = kubectl.pick_crd_schema(crd_entry, resource.version)
+              if schema_body and schema_version then
+                local uri = cache.persist_schema(context, crd_entry.group, crd_entry.kind, schema_version, schema_body)
+
+                if uri then
+                  table.insert(entries, {
+                    rule_key = resource_key(resource),
+                    resource = resource,
+                    uri = uri,
+                    name = string.format('%s %s/%s', crd_entry.kind, crd_entry.group, schema_version),
+                  })
+                else
+                  append_unique(errors, 'failed to persist CRD schema to cache')
+                end
+              end
+            end
+          end
+        end
+
+        if #entries == 0 then
+          if #errors > 0 then
+            callback({ reason = 'resolution-error' }, table.concat(errors, '; '))
+          else
+            callback({ reason = 'no-cluster-schema' }, nil)
+          end
           return
         end
 
+        if #entries == 1 then
+          callback({
+            reason = 'single-schema',
+            schema = {
+              name = entries[1].name,
+              uri = entries[1].uri,
+            },
+          }, nil)
+          return
+        end
+
+        local cache_key, schema = compose_schema(entries)
+        local composed_uri = cache.persist_generated_schema(context, cache_key, schema)
+        if not composed_uri then
+          callback({ reason = 'cache-write-failed' }, 'failed to persist composed schema to cache')
+          return
+        end
+
+        local schema_name
+        if #entries == #resources then
+          schema_name = string.format('Kubernetes multi-doc (%d docs)', #entries)
+        else
+          schema_name = string.format('Kubernetes multi-doc (%d/%d docs)', #entries, #resources)
+        end
+
         callback({
-          reason = 'core-resource',
+          reason = 'multi-document',
           schema = {
-            name = 'Kubernetes ' .. version,
-            uri = kubernetes_schema_uri(version),
+            name = schema_name,
+            uri = composed_uri,
           },
         }, nil)
       end)
-      return
-    end
-
-    if #non_core ~= 1 then
-      callback({ reason = 'ambiguous-crd' }, nil)
-      return
-    end
-
-    local selected = non_core[1]
-    local key = string.lower(selected.group .. '|' .. selected.kind)
-
-    kubectl.get_crd_index(context, function(index, crd_err)
-      if not index then
-        callback({ reason = 'crd-index-unavailable' }, crd_err)
-        return
-      end
-
-      local entry = index.by_key and index.by_key[key] or nil
-      if not entry then
-        callback({ reason = 'no-cluster-schema' }, nil)
-        return
-      end
-
-      local schema_body, schema_version = kubectl.pick_crd_schema(entry, selected.version)
-      if not schema_body or not schema_version then
-        callback({ reason = 'no-cluster-schema' }, nil)
-        return
-      end
-
-      local uri = cache.persist_schema(context, entry.group, entry.kind, schema_version, schema_body)
-      if not uri then
-        callback({ reason = 'cache-write-failed' }, 'failed to persist CRD schema to cache')
-        return
-      end
-
-      callback({
-        reason = 'cluster-crd',
-        schema = {
-          name = string.format('%s %s/%s', entry.kind, entry.group, schema_version),
-          uri = uri,
-        },
-      }, nil)
     end)
   end)
 end

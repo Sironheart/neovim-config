@@ -1,0 +1,4 @@
+[tools]
+node = "25.8.1"
+stylua = "latest"
+tree-sitter = "0.26.7"
