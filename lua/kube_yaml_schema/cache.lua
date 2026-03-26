@@ -32,26 +32,26 @@ local function normalize_schema(schema)
   return normalized
 end
 
-function M.context_cache_dir(context)
-  return util.path_join(state.opts.cache_dir, util.sanitize_filename(context))
+function M.cluster_cache_dir(cluster)
+  return util.path_join(state.opts.cache_dir, util.sanitize_filename(cluster))
 end
 
-function M.context_version_cache_path(context)
-  return util.path_join(M.context_cache_dir(context), 'server-version.json')
+function M.cluster_version_cache_path(cluster)
+  return util.path_join(M.cluster_cache_dir(cluster), 'server-version.json')
 end
 
-function M.context_crd_cache_path(context)
-  return util.path_join(M.context_cache_dir(context), 'crd-index.json')
+function M.cluster_crd_cache_path(cluster)
+  return util.path_join(M.cluster_cache_dir(cluster), 'crd-index.json')
 end
 
-function M.schema_file_path(context, group, kind, version)
+function M.schema_file_path(cluster, group, kind, version)
   local filename = string.format('%s__%s__%s.json', util.sanitize_filename(group), util.sanitize_filename(kind), util.sanitize_filename(version))
-  return util.path_join(M.context_cache_dir(context), 'schemas', filename)
+  return util.path_join(M.cluster_cache_dir(cluster), 'schemas', filename)
 end
 
-function M.generated_schema_path(context, key)
+function M.generated_schema_path(cluster, key)
   local filename = util.sanitize_filename(key) .. '.json'
-  return util.path_join(M.context_cache_dir(context), 'generated', filename)
+  return util.path_join(M.cluster_cache_dir(cluster), 'generated', filename)
 end
 
 function M.read_json_file(path)
@@ -100,13 +100,13 @@ function M.is_cache_fresh(path, ttl_seconds)
   return (util.now() - mtime) <= ttl_seconds
 end
 
-function M.persist_schema(context, group, kind, version, schema)
+function M.persist_schema(cluster, group, kind, version, schema)
   local normalized = normalize_schema(schema)
   if not normalized then
     return nil
   end
 
-  local path = M.schema_file_path(context, group, kind, version)
+  local path = M.schema_file_path(cluster, group, kind, version)
   if not M.write_json_file(path, normalized) then
     return nil
   end
@@ -114,13 +114,13 @@ function M.persist_schema(context, group, kind, version, schema)
   return 'file://' .. path
 end
 
-function M.persist_generated_schema(context, key, schema)
+function M.persist_generated_schema(cluster, key, schema)
   local normalized = normalize_schema(schema)
   if not normalized then
     return nil
   end
 
-  local path = M.generated_schema_path(context, key)
+  local path = M.generated_schema_path(cluster, key)
   if not M.write_json_file(path, normalized) then
     return nil
   end

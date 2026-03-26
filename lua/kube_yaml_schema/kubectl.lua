@@ -27,6 +27,32 @@ local function flush_waiters(waiters, payload, err)
   end
 end
 
+local function cache_ttl()
+  local value = state.opts.cache_ttl_seconds
+  if type(value) ~= 'number' then
+    return 0
+  end
+
+  return value
+end
+
+local function expires_at(ttl_seconds)
+  if ttl_seconds == 0 then
+    return math.huge
+  end
+
+  return util.now() + ttl_seconds
+end
+
+local function stale_ttl()
+  local configured = state.opts.stale_on_error_seconds
+  if configured > 0 then
+    return configured
+  end
+
+  return 60
+end
+
 local function parse_server_version(output)
   local ok, decoded = pcall(vim.json.decode, output)
   if not ok or type(decoded) ~= 'table' or type(decoded.serverVersion) ~= 'table' then
@@ -48,6 +74,35 @@ local function parse_server_version(output)
   end
 
   return 'v' .. git_version
+end
+
+local function parse_contexts(output)
+  local ok, decoded = pcall(vim.json.decode, output)
+  if not ok or type(decoded) ~= 'table' then
+    return nil
+  end
+
+  local context_to_cluster = {}
+  local contexts = {}
+
+  for _, item in ipairs(decoded.contexts or {}) do
+    if type(item) == 'table' and type(item.name) == 'string' and item.name ~= '' then
+      local cluster = item.context and item.context.cluster
+      if type(cluster) ~= 'string' or cluster == '' then
+        cluster = item.name
+      end
+
+      context_to_cluster[item.name] = cluster
+      table.insert(contexts, item.name)
+    end
+  end
+
+  table.sort(contexts)
+
+  return {
+    contexts = contexts,
+    context_to_cluster = context_to_cluster,
+  }
 end
 
 local function build_crd_index(crd_payload)
@@ -95,6 +150,53 @@ local function build_crd_index(crd_payload)
   return index
 end
 
+local function get_kubeconfig_data(callback)
+  local configured_ttl = cache_ttl()
+  local cached = state.kubeconfig
+
+  if cached.contexts and cached.context_to_cluster and cached.expires_at > util.now() then
+    callback(cached, nil)
+    return
+  end
+
+  if state.kubeconfig_inflight then
+    table.insert(state.kubeconfig_inflight, callback)
+    return
+  end
+
+  state.kubeconfig_inflight = { callback }
+
+  run_kubectl({ 'config', 'view', '-o', 'json' }, function(result)
+    local waiters = state.kubeconfig_inflight
+    state.kubeconfig_inflight = nil
+
+    if result.code ~= 0 then
+      if cached.contexts and cached.context_to_cluster then
+        flush_waiters(waiters, cached, nil)
+        return
+      end
+
+      flush_waiters(waiters, nil, vim.trim(result.stderr or 'failed to read kubeconfig contexts'))
+      return
+    end
+
+    local parsed = parse_contexts(result.stdout or '')
+    if not parsed then
+      if cached.contexts and cached.context_to_cluster then
+        flush_waiters(waiters, cached, nil)
+        return
+      end
+
+      flush_waiters(waiters, nil, 'failed to parse kubeconfig contexts')
+      return
+    end
+
+    parsed.expires_at = expires_at(configured_ttl)
+    state.kubeconfig = parsed
+    flush_waiters(waiters, parsed, nil)
+  end)
+end
+
 function M.pick_crd_schema(entry, requested_version)
   if not entry then
     return nil, nil
@@ -131,7 +233,30 @@ function M.pick_crd_schema(entry, requested_version)
   return nil, nil
 end
 
+function M.get_context_override()
+  return state.opts.context
+end
+
+function M.set_context_override(context)
+  if type(context) == 'string' and context ~= '' then
+    state.opts.context = context
+  else
+    state.opts.context = nil
+  end
+
+  state.context = {
+    value = nil,
+    expires_at = 0,
+  }
+end
+
 function M.get_current_context(callback)
+  local override = M.get_context_override()
+  if override then
+    callback(override, nil)
+    return
+  end
+
   if state.context.value and state.context.expires_at > util.now() then
     callback(state.context.value, nil)
     return
@@ -150,50 +275,136 @@ function M.get_current_context(callback)
     end
 
     state.context.value = context
-    state.context.expires_at = util.now() + state.opts.context_cache_ttl_seconds
+    state.context.expires_at = expires_at(cache_ttl())
     callback(context, nil)
   end)
 end
 
-function M.get_server_version(context, callback)
-  local cached = state.version_cache[context]
+function M.get_active_target(callback)
+  M.get_current_context(function(context, context_err)
+    if not context then
+      callback(nil, context_err)
+      return
+    end
+
+    get_kubeconfig_data(function(data)
+      local cluster = context
+      if data and data.context_to_cluster and data.context_to_cluster[context] then
+        cluster = data.context_to_cluster[context]
+      end
+
+      callback({
+        context = context,
+        cluster = cluster,
+      }, nil)
+    end)
+  end)
+end
+
+function M.list_context_entries(callback)
+  get_kubeconfig_data(function(data, err)
+    if not data then
+      callback(nil, err)
+      return
+    end
+
+    local entries = {}
+    for _, context in ipairs(data.contexts) do
+      local cluster = data.context_to_cluster and data.context_to_cluster[context] or context
+      table.insert(entries, {
+        context = context,
+        cluster = cluster,
+      })
+    end
+
+    callback(entries, nil)
+  end)
+end
+
+function M.list_contexts(callback)
+  M.list_context_entries(function(entries, err)
+    if not entries then
+      callback(nil, err)
+      return
+    end
+
+    local contexts = {}
+    for _, entry in ipairs(entries) do
+      table.insert(contexts, entry.context)
+    end
+
+    callback(contexts, nil)
+  end)
+end
+
+function M.list_contexts_sync()
+  local result = vim.system({ state.opts.kubectl_bin, 'config', 'get-contexts', '-o', 'name' }, { text = true, timeout = state.opts.kubectl_timeout_ms }):wait()
+
+  if result.code ~= 0 then
+    return {}
+  end
+
+  local contexts = vim.split(result.stdout or '', '\n', { trimempty = true })
+  table.sort(contexts)
+  return contexts
+end
+
+function M.context_exists(name, callback)
+  if type(name) ~= 'string' or name == '' then
+    callback(false, 'context cannot be empty')
+    return
+  end
+
+  M.list_contexts(function(contexts, err)
+    if not contexts then
+      callback(false, err)
+      return
+    end
+
+    callback(vim.list_contains(contexts, name), nil)
+  end)
+end
+
+function M.get_server_version(target, callback)
+  local cache_key = target.cluster
+  local cached = state.version_cache[cache_key]
   if cached and cached.expires_at > util.now() then
     callback(cached.version, nil)
     return
   end
 
-  local cache_path = cache.context_version_cache_path(context)
+  local cache_path = cache.cluster_version_cache_path(cache_key)
   local stale = cache.read_json_file(cache_path)
+  local configured_ttl = cache_ttl()
 
-  if stale and cache.is_cache_fresh(cache_path, state.opts.cache_ttl_seconds) then
+  if stale and cache.is_cache_fresh(cache_path, configured_ttl) then
     local version = stale.version
     if type(version) == 'string' and version ~= '' then
-      local expires_at = state.opts.cache_ttl_seconds == 0 and math.huge or (util.now() + state.opts.cache_ttl_seconds)
-      state.version_cache[context] = {
+      state.version_cache[cache_key] = {
         version = version,
-        expires_at = expires_at,
+        expires_at = expires_at(configured_ttl),
       }
       callback(version, nil)
       return
     end
   end
 
-  if state.version_inflight[context] then
-    table.insert(state.version_inflight[context], callback)
+  if state.version_inflight[cache_key] then
+    table.insert(state.version_inflight[cache_key], callback)
     return
   end
 
-  state.version_inflight[context] = { callback }
+  state.version_inflight[cache_key] = { callback }
 
-  run_kubectl_for_context(context, { 'version', '--output=json' }, function(result)
-    local waiters = state.version_inflight[context]
-    state.version_inflight[context] = nil
+  run_kubectl_for_context(target.context, { 'version', '--output=json' }, function(result)
+    local waiters = state.version_inflight[cache_key]
+    state.version_inflight[cache_key] = nil
 
     if result.code ~= 0 then
       if stale and type(stale.version) == 'string' and stale.version ~= '' then
-        state.version_cache[context] = {
+        state.version_cache[cache_key] = {
           version = stale.version,
-          expires_at = util.now() + 60,
+          expires_at = util.now() + stale_ttl(),
         }
         flush_waiters(waiters, stale.version, nil)
         return
@@ -209,10 +420,9 @@ function M.get_server_version(context, callback)
       return
     end
 
-    local expires_at = state.opts.cache_ttl_seconds == 0 and math.huge or (util.now() + state.opts.cache_ttl_seconds)
-    state.version_cache[context] = {
+    state.version_cache[cache_key] = {
       version = version,
-      expires_at = expires_at,
+      expires_at = expires_at(configured_ttl),
     }
 
     cache.write_json_file(cache_path, { version = version })
@@ -220,42 +430,43 @@ function M.get_server_version(context, callback)
   end)
 end
 
-function M.get_crd_index(context, callback)
-  local cached = state.crd_cache[context]
+function M.get_crd_index(target, callback)
+  local cache_key = target.cluster
+  local cached = state.crd_cache[cache_key]
   if cached and cached.expires_at > util.now() then
     callback(cached.index, nil)
     return
   end
 
-  local cache_path = cache.context_crd_cache_path(context)
+  local cache_path = cache.cluster_crd_cache_path(cache_key)
   local stale = cache.read_json_file(cache_path)
+  local configured_ttl = cache_ttl()
 
-  if stale and cache.is_cache_fresh(cache_path, state.opts.cache_ttl_seconds) then
-    local expires_at = state.opts.cache_ttl_seconds == 0 and math.huge or (util.now() + state.opts.cache_ttl_seconds)
-    state.crd_cache[context] = {
+  if stale and cache.is_cache_fresh(cache_path, configured_ttl) then
+    state.crd_cache[cache_key] = {
       index = stale,
-      expires_at = expires_at,
+      expires_at = expires_at(configured_ttl),
     }
     callback(stale, nil)
     return
   end
 
-  if state.crd_inflight[context] then
-    table.insert(state.crd_inflight[context], callback)
+  if state.crd_inflight[cache_key] then
+    table.insert(state.crd_inflight[cache_key], callback)
     return
   end
 
-  state.crd_inflight[context] = { callback }
+  state.crd_inflight[cache_key] = { callback }
 
-  run_kubectl_for_context(context, { 'get', 'crd', '--output=json' }, function(result)
-    local waiters = state.crd_inflight[context]
-    state.crd_inflight[context] = nil
+  run_kubectl_for_context(target.context, { 'get', 'crd', '--output=json' }, function(result)
+    local waiters = state.crd_inflight[cache_key]
+    state.crd_inflight[cache_key] = nil
 
     if result.code ~= 0 then
       if stale then
-        state.crd_cache[context] = {
+        state.crd_cache[cache_key] = {
           index = stale,
-          expires_at = util.now() + 60,
+          expires_at = util.now() + stale_ttl(),
         }
         flush_waiters(waiters, stale, nil)
         return
@@ -272,11 +483,9 @@ function M.get_crd_index(context, callback)
     end
 
     local index = build_crd_index(decoded)
-    local expires_at = state.opts.cache_ttl_seconds == 0 and math.huge or (util.now() + state.opts.cache_ttl_seconds)
-
-    state.crd_cache[context] = {
+    state.crd_cache[cache_key] = {
       index = index,
-      expires_at = expires_at,
+      expires_at = expires_at(configured_ttl),
     }
 
     cache.write_json_file(cache_path, index)

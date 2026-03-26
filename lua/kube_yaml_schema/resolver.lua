@@ -106,9 +106,9 @@ function M.resolve_for_buffer(bufnr, callback)
     return
   end
 
-  kubectl.get_current_context(function(context, context_err)
-    if not context then
-      callback({ reason = 'context-unavailable' }, context_err)
+  kubectl.get_active_target(function(target, target_err)
+    if not target then
+      callback({ reason = 'context-unavailable' }, target_err)
       return
     end
 
@@ -128,7 +128,7 @@ function M.resolve_for_buffer(bufnr, callback)
         return
       end
 
-      kubectl.get_server_version(context, next)
+      kubectl.get_server_version(target, next)
     end
 
     local function with_crd_index(next)
@@ -137,7 +137,7 @@ function M.resolve_for_buffer(bufnr, callback)
         return
       end
 
-      kubectl.get_crd_index(context, next)
+      kubectl.get_crd_index(target, next)
     end
 
     with_server_version(function(version, version_err)
@@ -170,7 +170,7 @@ function M.resolve_for_buffer(bufnr, callback)
             if crd_entry then
               local schema_body, schema_version = kubectl.pick_crd_schema(crd_entry, resource.version)
               if schema_body and schema_version then
-                local uri = cache.persist_schema(context, crd_entry.group, crd_entry.kind, schema_version, schema_body)
+                local uri = cache.persist_schema(target.cluster, crd_entry.group, crd_entry.kind, schema_version, schema_body)
 
                 if uri then
                   table.insert(entries, {
@@ -208,7 +208,7 @@ function M.resolve_for_buffer(bufnr, callback)
         end
 
         local cache_key, schema = compose_schema(entries)
-        local composed_uri = cache.persist_generated_schema(context, cache_key, schema)
+        local composed_uri = cache.persist_generated_schema(target.cluster, cache_key, schema)
         if not composed_uri then
           callback({ reason = 'cache-write-failed' }, 'failed to persist composed schema to cache')
           return

@@ -1,43 +1,43 @@
 return {
   {
     'junnplus/lsp-setup.nvim',
+    event = { 'BufReadPre', 'BufNewFile' },
     dependencies = {
       'neovim/nvim-lspconfig',
+      'kube-yaml-schema.nvim',
 
       'saghen/blink.cmp',
       'folke/snacks.nvim',
     },
-    config = function(_, opts)
-      require('kube_yaml_schema').setup()
-      require('lsp-setup').setup(opts)
+    opts = function()
+      return {
+        servers = require 'custom.language-server',
+        inlay_hints = { enabled = true },
+        capabilities = require('blink.cmp').get_lsp_capabilities(),
+        default_mappings = false,
+        mappings = {
+          gd = 'lua require"snacks".picker.lsp_definitions()',
+          gr = 'lua require"snacks".picker.lsp_references()',
+          gI = 'lua require"snacks".picker.lsp_implementations()',
+          D = 'lua require"snacks".picker.lsp_type_definitions()',
+          K = { cmd = vim.lsp.buf.hover, opts = { desc = 'Hover Documentation' } },
+          ['<space>rn'] = { cmd = vim.lsp.buf.rename, opts = { desc = 'Rename' } },
+          ['<space>ca'] = { cmd = vim.lsp.buf.code_action, opts = { desc = 'Code Action' } },
+          ['[d'] = {
+            cmd = function()
+              vim.diagnostic.jump { count = -1, float = true }
+            end,
+            opts = { desc = 'Prev Diagnostic' },
+          },
+          [']d'] = {
+            cmd = function()
+              vim.diagnostic.jump { count = 1, float = true }
+            end,
+            opts = { desc = 'Next Diagnostic' },
+          },
+        },
+      }
     end,
-    opts = {
-      servers = require 'custom.language-server',
-      inlay_hints = { enabled = true },
-      capabilities = require('blink.cmp').get_lsp_capabilities(),
-      default_mappings = false,
-      mappings = {
-        gd = 'lua require"snacks".picker.lsp_definitions()',
-        gr = 'lua require"snacks".picker.lsp_references()',
-        gI = 'lua require"snacks".picker.lsp_implementations()',
-        D = 'lua require"snacks".picker.lsp_type_definitions()',
-        K = { cmd = vim.lsp.buf.hover, opts = { desc = 'Hover Documentation' } },
-        ['<space>rn'] = { cmd = vim.lsp.buf.rename, opts = { desc = 'Rename' } },
-        ['<space>ca'] = { cmd = vim.lsp.buf.code_action, opts = { desc = 'Code Action' } },
-        ['[d'] = {
-          cmd = function()
-            vim.diagnostic.jump { count = -1, float = true }
-          end,
-          opts = { desc = 'Prev Diagnostic' },
-        },
-        [']d'] = {
-          cmd = function()
-            vim.diagnostic.jump { count = 1, float = true }
-          end,
-          opts = { desc = 'Next Diagnostic' },
-        },
-      },
-    },
   },
   {
     -- Main LSP Configuration

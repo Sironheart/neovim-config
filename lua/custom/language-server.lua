@@ -1,5 +1,4 @@
 local M = {}
-local kube_yaml_schema = require 'kube_yaml_schema'
 
 M.astro = {}
 
@@ -115,6 +114,8 @@ M.twiggy_language_server = {
 
 M.vue_ls = { init_options = { vue = { hybridMode = false } } }
 
-M.yamlls = kube_yaml_schema.yamlls_config()
+M.yamlls = function()
+  return require('kube_yaml_schema').yamlls_config()
+end
 
 return M

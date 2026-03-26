@@ -7,6 +7,12 @@ local M = {
     value = nil,
     expires_at = 0,
   },
+  kubeconfig = {
+    contexts = nil,
+    context_to_cluster = nil,
+    expires_at = 0,
+  },
+  kubeconfig_inflight = nil,
   version_cache = {},
   version_inflight = {},
   crd_cache = {},
@@ -20,6 +26,12 @@ function M.reset_runtime()
     value = nil,
     expires_at = 0,
   }
+  M.kubeconfig = {
+    contexts = nil,
+    context_to_cluster = nil,
+    expires_at = 0,
+  }
+  M.kubeconfig_inflight = nil
   M.version_cache = {}
   M.version_inflight = {}
   M.crd_cache = {}
