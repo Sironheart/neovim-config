@@ -1,25 +1,9 @@
 return {
   {
-    'mosheavni/yaml-companion.nvim',
-    opts = {
-      builtin_matchers = {
-        kubernetes = { enabled = true },
-        cloud_init = { enabled = true },
-      },
-
-      cluster_crds = {
-        enabled = true,
-        fallback = true,
-      },
-    },
-    config = function(_, opts)
-      local cfg = require('yaml-companion').setup(opts)
-      vim.lsp.config('yamlls', cfg)
-    end,
-  },
-  {
     'junnplus/lsp-setup.nvim',
+    event = { 'BufReadPre', 'BufNewFile' },
     dependencies = {
+      'sironheart/kube_yaml_schema.nvim',
       'neovim/nvim-lspconfig',
 
       'saghen/blink.cmp',
@@ -62,7 +46,7 @@ return {
       'mason-org/mason-lspconfig.nvim',
       'WhoIsSethDaniel/mason-tool-installer.nvim',
 
-      { 'j-hui/fidget.nvim',       opts = {} },
+      { 'j-hui/fidget.nvim', opts = {} },
 
       -- For the capabilities
       'saghen/blink.cmp',
@@ -98,29 +82,31 @@ return {
   },
   {
     'stevearc/conform.nvim',
-    event = { 'BufWritePre' },
-    cmd = { 'ConformInfo' },
     opts = {
       formatters_by_ft = {
         ['_'] = { 'prettier' },
         elixir = { 'mix' },
         go = { 'goimports', 'gofmt' },
+        gleam = { 'gleam' },
         javascript = { 'biome', 'prettier', stop_after_first = true },
+        java = { 'palantir-java-format' },
         json = { 'jq' },
         just = { 'just' },
+        kotlin = { 'ktfmt' },
         lua = { 'stylua' },
         php = { 'php_cs_fixer' },
-        python = { 'ruff' },
+        python = { 'ruff_fix', 'ruff_format', 'ruff_organize_imports' },
         rust = { 'rustfmt' },
         terraform = { 'tofu_fmt', 'terraform_fmt', stop_after_first = true },
         toml = { 'taplo' },
         typescript = { 'biome', 'prettier', stop_after_first = true },
+        yaml = { 'yq' },
       },
       format_on_save = {
         timeout_ms = 500,
         lsp_format = 'fallback',
       },
-      notify_no_formatters = false,
+      notify_no_formatters = true,
     },
   },
 }

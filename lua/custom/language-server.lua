@@ -25,6 +25,8 @@ M.gopls = {
   completeUnimported = true,
 }
 
+M.gleam = {}
+
 M.html = {}
 
 M.jsonls = {}
@@ -114,6 +116,8 @@ M.twiggy_language_server = {
 
 M.vue_ls = { init_options = { vue = { hybridMode = false } } }
 
-M.yamlls = {}
+M.yamlls = function()
+  return require('kube_yaml_schema').yamlls_config()
+end
 
 return M
