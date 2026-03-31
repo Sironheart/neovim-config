@@ -100,7 +100,6 @@ return {
         terraform = { 'tofu_fmt', 'terraform_fmt', stop_after_first = true },
         toml = { 'taplo' },
         typescript = { 'biome', 'prettier', stop_after_first = true },
-        yaml = { 'yq' },
       },
       format_on_save = {
         timeout_ms = 500,
