@@ -29,7 +29,14 @@ M.gleam = {}
 
 M.html = {}
 
-M.jsonls = {}
+M.jsonls = {
+  settings = {
+    json = {
+      schemas = require('schemastore').json.schemas(),
+      validate = { enable = true },
+    },
+  },
+}
 
 M.kotlin_lsp = {}
 
@@ -117,7 +124,7 @@ M.twiggy_language_server = {
 M.vue_ls = { init_options = { vue = { hybridMode = false } } }
 
 M.yamlls = function()
-  return require('kube_yaml_schema').yamlls_config()
+  return require('kube_yaml_schema').yamlls_config {}
 end
 
 return M
