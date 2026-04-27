@@ -12,7 +12,7 @@ M.gopls = {
   settings = {
     gopls = {
       hints = {
-        assignVariableTypes = true,
+        assignVariableTypes = false,
         compositeLiteralFields = true,
         compositeLiteralTypes = true,
         constantValues = true,
@@ -124,7 +124,15 @@ M.twiggy_language_server = {
 M.vue_ls = { init_options = { vue = { hybridMode = false } } }
 
 M.yamlls = function()
-  return require('kube_yaml_schema').yamlls_config {}
+  return require('kube_yaml_schema').yamlls_config {
+    settings = {
+      yaml = {
+        format = {
+          enable = false,
+        },
+      },
+    },
+  }
 end
 
 return M
