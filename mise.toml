@@ -1,5 +1,5 @@
 [tools]
-node = "25.8.1"
+node = "25.9.0"
 stylua = "2.4.0"
 tree-sitter = "0.26.7"
 
