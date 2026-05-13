@@ -7,9 +7,10 @@ return {
     },
     opts = {
       auto_refresh = true,
+      cache_ttl_seconds = 300,
       notify = true,
       notify_on_auto_refresh = false,
-      cache_ttl_seconds = 300,
+      refresh_on_kubernetes_fields = true,
       stale_on_error_seconds = 60,
     },
   },

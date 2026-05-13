@@ -46,7 +46,7 @@ return {
       'mason-org/mason-lspconfig.nvim',
       'WhoIsSethDaniel/mason-tool-installer.nvim',
 
-      { 'j-hui/fidget.nvim', opts = {} },
+      { 'j-hui/fidget.nvim',       opts = {} },
 
       -- For the capabilities
       'saghen/blink.cmp',
@@ -97,13 +97,13 @@ return {
         php = { 'php_cs_fixer' },
         python = { 'ruff_fix', 'ruff_format', 'ruff_organize_imports' },
         rust = { 'rustfmt' },
-        terraform = { 'tofu_fmt', 'terraform_fmt', stop_after_first = true },
+        terraform = { 'tofu_fmt', stop_after_first = true },
         toml = { 'taplo' },
         typescript = { 'biome', 'prettier', stop_after_first = true },
       },
       format_on_save = {
         timeout_ms = 500,
-        lsp_format = 'fallback',
+        lsp_format = 'never',
       },
       notify_no_formatters = true,
     },
