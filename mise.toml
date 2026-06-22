@@ -1,6 +1,6 @@
 [tools]
 node = "25.8.1"
-stylua = "2.4.0"
+stylua = "2.5.2"
 tree-sitter = "0.26.9"
 
 [tasks.format]
