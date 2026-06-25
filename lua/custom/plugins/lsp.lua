@@ -87,7 +87,6 @@ return {
         ['_'] = { 'prettier' },
         elixir = { 'mix' },
         go = { 'goimports', 'gofmt' },
-        gleam = { 'gleam' },
         javascript = { 'biome', 'prettier', stop_after_first = true },
         java = { 'palantir-java-format' },
         json = {},
