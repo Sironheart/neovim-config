@@ -1,10 +1,11 @@
 return {
   'saghen/blink.cmp',
-  lazy = false,
   dependencies = {
+    'saghen/blink.lib',
+    -- optional: provides snippets for the snippet source
     'rafamadriz/friendly-snippets',
   },
-  version = 'v1.*',
+  build = function() require('blink.cmp').build():pwait() end,
   opts = {
     keymap = {
       preset = 'default',
@@ -29,6 +30,7 @@ return {
       documentation = {
         auto_show = true,
       },
+      ghost_text = { enabled = true },
     },
   },
 }
