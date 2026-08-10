@@ -1,3 +1,3 @@
 require 'custom.config'
-require 'custom.lazy'
+require 'custom.pack'
 require 'custom.autocmd'

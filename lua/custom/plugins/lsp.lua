@@ -1,110 +1,84 @@
-return {
-  {
-    'junnplus/lsp-setup.nvim',
-    event = { 'BufReadPre', 'BufNewFile' },
-    dependencies = {
-      'sironheart/kube_yaml_schema.nvim',
-      'neovim/nvim-lspconfig',
+-- BufReadPre / BufNewFile: mason + lsp-setup + conform
 
-      'saghen/blink.cmp',
-      'folke/snacks.nvim',
-    },
-    opts = {
-      servers = require 'custom.language-server',
-      inlay_hints = { enabled = true },
-      capabilities = require('blink.cmp').get_lsp_capabilities(),
-      default_mappings = false,
-      mappings = {
-        gd = 'lua require"snacks".picker.lsp_definitions()',
-        gr = 'lua require"snacks".picker.lsp_references()',
-        gI = 'lua require"snacks".picker.lsp_implementations()',
-        D = 'lua require"snacks".picker.lsp_type_definitions()',
-        K = { cmd = vim.lsp.buf.hover, opts = { desc = 'Hover Documentation' } },
-        ['<space>rn'] = { cmd = vim.lsp.buf.rename, opts = { desc = 'Rename' } },
-        ['<space>ca'] = { cmd = vim.lsp.buf.code_action, opts = { desc = 'Code Action' } },
-        ['[d'] = {
-          cmd = function()
-            vim.diagnostic.jump { count = -1, float = true }
-          end,
-          opts = { desc = 'Prev Diagnostic' },
-        },
-        [']d'] = {
-          cmd = function()
-            vim.diagnostic.jump { count = 1, float = true }
-          end,
-          opts = { desc = 'Next Diagnostic' },
-        },
-      },
-    },
-  },
-  {
-    -- Main LSP Configuration
-    'neovim/nvim-lspconfig',
-    dependencies = {
-      -- Automatically install LSPs and related tools to stdpath for Neovim
-      { 'williamboman/mason.nvim', opts = {} },
-      'mason-org/mason-lspconfig.nvim',
-      'WhoIsSethDaniel/mason-tool-installer.nvim',
+require('mason').setup {}
+require('fidget').setup {}
 
-      { 'j-hui/fidget.nvim',       opts = {} },
-
-      -- For the capabilities
-      'saghen/blink.cmp',
+vim.diagnostic.config {
+  severity_sort = true,
+  float = { border = 'rounded', source = 'if_many' },
+  underline = { severity = vim.diagnostic.severity.ERROR },
+  signs = vim.g.have_nerd_font and {
+    text = {
+      [vim.diagnostic.severity.ERROR] = '󰅚 ',
+      [vim.diagnostic.severity.WARN] = '󰀪 ',
+      [vim.diagnostic.severity.INFO] = '󰋽 ',
+      [vim.diagnostic.severity.HINT] = '󰌶 ',
     },
-    config = function()
-      vim.diagnostic.config {
-        severity_sort = true,
-        float = { border = 'rounded', source = 'if_many' },
-        underline = { severity = vim.diagnostic.severity.ERROR },
-        signs = vim.g.have_nerd_font and {
-          text = {
-            [vim.diagnostic.severity.ERROR] = '󰅚 ',
-            [vim.diagnostic.severity.WARN] = '󰀪 ',
-            [vim.diagnostic.severity.INFO] = '󰋽 ',
-            [vim.diagnostic.severity.HINT] = '󰌶 ',
-          },
-        } or {},
-        virtual_text = {
-          source = 'if_many',
-          spacing = 2,
-          format = function(diagnostic)
-            local diagnostic_message = {
-              [vim.diagnostic.severity.ERROR] = diagnostic.message,
-              [vim.diagnostic.severity.WARN] = diagnostic.message,
-              [vim.diagnostic.severity.INFO] = diagnostic.message,
-              [vim.diagnostic.severity.HINT] = diagnostic.message,
-            }
-            return diagnostic_message[diagnostic.severity]
-          end,
-        },
+  } or {},
+  virtual_text = {
+    source = 'if_many',
+    spacing = 2,
+    format = function(diagnostic)
+      local diagnostic_message = {
+        [vim.diagnostic.severity.ERROR] = diagnostic.message,
+        [vim.diagnostic.severity.WARN] = diagnostic.message,
+        [vim.diagnostic.severity.INFO] = diagnostic.message,
+        [vim.diagnostic.severity.HINT] = diagnostic.message,
       }
+      return diagnostic_message[diagnostic.severity]
     end,
   },
-  {
-    'stevearc/conform.nvim',
-    opts = {
-      formatters_by_ft = {
-        ['_'] = { 'prettier' },
-        elixir = { 'mix' },
-        go = { 'goimports', 'gofmt' },
-        javascript = { 'biome', 'prettier', stop_after_first = true },
-        java = { 'palantir-java-format' },
-        json = {},
-        just = { 'just' },
-        kotlin = { 'ktfmt' },
-        lua = { 'stylua' },
-        php = { 'php_cs_fixer' },
-        python = { 'ruff_fix', 'ruff_format', 'ruff_organize_imports' },
-        rust = { 'rustfmt' },
-        terraform = { 'tofu_fmt', stop_after_first = true },
-        toml = { 'taplo' },
-        typescript = { 'biome', 'prettier', stop_after_first = true },
-      },
-      format_on_save = {
-        timeout_ms = 500,
-        lsp_format = 'never',
-      },
-      notify_no_formatters = true,
+}
+
+require('lsp-setup').setup {
+  servers = require 'custom.language-server',
+  inlay_hints = { enabled = true },
+  capabilities = require('blink.cmp').get_lsp_capabilities(),
+  default_mappings = false,
+  mappings = {
+    gd = 'lua require"snacks".picker.lsp_definitions()',
+    gr = 'lua require"snacks".picker.lsp_references()',
+    gI = 'lua require"snacks".picker.lsp_implementations()',
+    D = 'lua require"snacks".picker.lsp_type_definitions()',
+    K = { cmd = vim.lsp.buf.hover, opts = { desc = 'Hover Documentation' } },
+    ['<space>rn'] = { cmd = vim.lsp.buf.rename, opts = { desc = 'Rename' } },
+    ['<space>ca'] = { cmd = vim.lsp.buf.code_action, opts = { desc = 'Code Action' } },
+    ['[d'] = {
+      cmd = function()
+        vim.diagnostic.jump { count = -1, float = true }
+      end,
+      opts = { desc = 'Prev Diagnostic' },
+    },
+    [']d'] = {
+      cmd = function()
+        vim.diagnostic.jump { count = 1, float = true }
+      end,
+      opts = { desc = 'Next Diagnostic' },
     },
   },
+}
+
+require('conform').setup {
+  formatters_by_ft = {
+    ['_'] = { 'prettier' },
+    elixir = { 'mix' },
+    go = { 'goimports', 'gofmt' },
+    javascript = { 'biome', 'prettier', stop_after_first = true },
+    java = { 'palantir-java-format' },
+    json = {},
+    just = { 'just' },
+    kotlin = { 'ktfmt' },
+    lua = { 'stylua' },
+    php = { 'php_cs_fixer' },
+    python = { 'ruff_fix', 'ruff_format', 'ruff_organize_imports' },
+    rust = { 'rustfmt' },
+    terraform = { 'tofu_fmt', stop_after_first = true },
+    toml = { 'taplo' },
+    typescript = { 'biome', 'prettier', stop_after_first = true },
+  },
+  format_on_save = {
+    timeout_ms = 500,
+    lsp_format = 'never',
+  },
+  notify_no_formatters = true,
 }

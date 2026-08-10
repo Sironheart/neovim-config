@@ -1,14 +1,10 @@
-return {
-  {
-    'saecki/crates.nvim',
-    event = 'BufRead Cargo.toml',
-    opts = {
-      lsp = {
-        enabled = true,
-        actions = true,
-        completion = true,
-        hover = true,
-      },
-    },
+-- BufReadPre Cargo.toml: crates.io completion / LSP
+
+require('crates').setup {
+  lsp = {
+    enabled = true,
+    actions = true,
+    completion = true,
+    hover = true,
   },
 }

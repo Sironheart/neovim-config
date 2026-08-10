@@ -95,6 +95,7 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   end,
 })
 
+-- Treesitter-aware commentstring; plugin is eager-loaded in pack.lua
 local get_option = vim.filetype.get_option
 ---@diagnostic disable-next-line: duplicate-set-field
 vim.filetype.get_option = function(filetype, option)

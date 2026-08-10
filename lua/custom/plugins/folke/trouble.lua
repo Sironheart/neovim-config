@@ -1,12 +1,5 @@
-return {
-  'folke/trouble.nvim',
-  opts = {}, -- for default options, refer to the configuration section for custom setup.
-  cmd = 'Trouble',
-  keys = {
-    {
-      '<leader>xx',
-      '<cmd>Trouble diagnostics toggle<cr>',
-      desc = 'Diagnostics (Trouble)',
-    },
-  },
-}
+-- Key-triggered from pack.lua (<leader>xx); replace stub with real mapping after load
+
+require('trouble').setup {}
+
+vim.keymap.set('n', '<leader>xx', '<cmd>Trouble diagnostics toggle<cr>', { desc = 'Diagnostics (Trouble)' })

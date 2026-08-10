@@ -1,8 +1,3 @@
-return {
-  {
-    'windwp/nvim-ts-autotag',
-    config = function()
-      require('nvim-ts-autotag').setup()
-    end,
-  },
-}
+-- VimEnter: HTML/JSX autotag via treesitter
+
+require('nvim-ts-autotag').setup()

@@ -1,7 +1,3 @@
-return {
-  'folke/todo-comments.nvim',
-  event = 'VimEnter',
-  dependencies = {
-    'nvim-lua/plenary.nvim',
-  },
-}
+-- VimEnter: highlight TODO/FIXME etc.
+
+require('todo-comments').setup()
