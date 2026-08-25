@@ -60,12 +60,16 @@ vim.pack.add {
   -- ftdetect must run early or FileType never fires for these
   gh 'tpope/vim-sleuth',
   gh 'NoahTheDuke/vim-just',
+  -- cmdline completion must exist before the first `:`
+  gh 'saghen/blink.lib',
+  gh 'saghen/blink.cmp',
 }
 
 require('ts_context_commentstring').setup { enable_autocmd = false }
 require 'custom.plugins.mini'
 require 'custom.plugins.folke.snacks'
 require 'custom.plugins.statusline'
+require 'custom.plugins.cmp'
 
 vim.cmd.colorscheme 'flexoki-dark'
 
@@ -92,8 +96,6 @@ vim.pack.add({
   gh 'WhoIsSethDaniel/mason-tool-installer.nvim',
   gh 'j-hui/fidget.nvim',
   gh 'stevearc/conform.nvim',
-  gh 'saghen/blink.lib',
-  gh 'saghen/blink.cmp',
   gh 'rafamadriz/friendly-snippets',
   gh 'b0o/schemastore.nvim',
 }, { load = defer_load })
@@ -121,12 +123,10 @@ once('VimEnter', {}, function()
 end)
 
 ---------------------------------------------------------------------------
--- Buffer open: LSP / completion / format stack
+-- Buffer open: LSP / format stack (completion is eager: needed for cmdline)
 ---------------------------------------------------------------------------
-once({ 'BufReadPre', 'BufNewFile' }, {}, function()
+once({ 'BufReadPre', 'BufNewFile', 'CmdlineEnter' }, {}, function()
   packadd_all {
-    'blink.lib',
-    'blink.cmp',
     'friendly-snippets',
     'schemastore.nvim',
     'mason.nvim',
@@ -137,7 +137,6 @@ once({ 'BufReadPre', 'BufNewFile' }, {}, function()
     'lsp-setup.nvim',
     'conform.nvim',
   }
-  require 'custom.plugins.cmp'
   require 'custom.plugins.kube_yaml_schema'
   require 'custom.plugins.lsp'
 end)

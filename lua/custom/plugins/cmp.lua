@@ -1,8 +1,11 @@
--- BufReadPre / BufNewFile: completion (paired with LSP stack in pack.lua)
+-- Eager: completion (blink also provides cmdline completion, must beat first `:`)
 
 require('blink.cmp').setup {
   keymap = {
     preset = 'default',
+  },
+  cmdline = {
+    completion = { menu = { auto_show = true } },
   },
   signature = { enabled = true },
   sources = {
