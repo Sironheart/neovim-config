@@ -40,8 +40,6 @@ M.jsonls = {
   end,
 }
 
-M.kotlin_lsp = {}
-
 M.lua_ls = { settings = { Lua = { workspace = { checkThirdParty = 'Disable' } } } }
 
 M.phpactor = {
