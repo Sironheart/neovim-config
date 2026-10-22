@@ -32,6 +32,7 @@ vim.diagnostic.config {
 
 require('lsp-setup').setup {
   servers = require 'custom.language-server',
+  on_attach = function() end, -- Conform owns format-on-save.
   inlay_hints = { enabled = true },
   capabilities = require('blink.cmp').get_lsp_capabilities(),
   default_mappings = false,

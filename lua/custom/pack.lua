@@ -91,6 +91,7 @@ vim.pack.add({
   gh 'saecki/crates.nvim',
   gh 'junnplus/lsp-setup.nvim',
   gh 'neovim/nvim-lspconfig',
+  gh 'jmbuhr/otter.nvim',
   gh 'williamboman/mason.nvim',
   gh 'mason-org/mason-lspconfig.nvim',
   gh 'WhoIsSethDaniel/mason-tool-installer.nvim',
@@ -148,6 +149,15 @@ once('FileType', { pattern = 'lua' }, function()
   packadd_all { 'luvit-meta', 'lazydev.nvim' }
   require 'custom.plugins.folke.lazydev'
 end)
+
+vim.api.nvim_create_autocmd('FileType', {
+  group = vim.api.nvim_create_augroup('custom.pack.otter', {}),
+  pattern = 'markdown',
+  callback = function()
+    vim.cmd.packadd 'otter.nvim'
+    require('otter').activate()
+  end,
+})
 
 once('BufReadPre', { pattern = 'Cargo.toml' }, function()
   vim.cmd.packadd 'crates.nvim'
