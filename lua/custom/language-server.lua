@@ -1,14 +1,20 @@
-local M = {}
+local M = {
+  managed_servers = {},
+  unmanaged_servers = {
+    mise = {},
+  },
+}
+local managed_servers = M.managed_servers
 
-M.astro = {}
+managed_servers.astro = {}
 
-M.cssls = {}
+managed_servers.cssls = {}
 
-M.docker_compose_language_service = {}
+managed_servers.docker_compose_language_service = {}
 
-M.dockerls = {}
+managed_servers.dockerls = {}
 
-M.gopls = {
+managed_servers.gopls = {
   settings = {
     gopls = {
       hints = {
@@ -25,9 +31,9 @@ M.gopls = {
   completeUnimported = true,
 }
 
-M.html = {}
+managed_servers.html = {}
 
-M.jsonls = {
+managed_servers.jsonls = {
   settings = {
     json = {
       schemas = require('schemastore').json.schemas(),
@@ -40,18 +46,18 @@ M.jsonls = {
   end,
 }
 
-M.lua_ls = { settings = { Lua = { workspace = { checkThirdParty = 'Disable' } } } }
+managed_servers.lua_ls = { settings = { Lua = { workspace = { checkThirdParty = 'Disable' } } } }
 
-M.phpactor = {
+managed_servers.phpactor = {
   init_options = {
     ['language_server_phpstan.enabled'] = false,
     ['language_server_psalm.enabled'] = false,
   },
 }
 
-M.pyright = {}
+managed_servers.pyright = {}
 
-M.rust_analyzer = {
+managed_servers.rust_analyzer = {
   settings = {
     ['rust-analyzer'] = {
       cargo = {
@@ -87,11 +93,11 @@ M.rust_analyzer = {
   },
 }
 
-M.tailwindcss = {}
+managed_servers.tailwindcss = {}
 
-M.taplo = {}
+managed_servers.taplo = {}
 
-M.terraformls = {}
+managed_servers.terraformls = {}
 
 local ts_ls_inlayhint_config = {
   inlayHints = {
@@ -103,7 +109,7 @@ local ts_ls_inlayhint_config = {
   },
 }
 
-M.ts_ls = {
+managed_servers.ts_ls = {
   settings = {
     typescript = { ts_ls_inlayhint_config },
     javascript = { ts_ls_inlayhint_config },
@@ -111,7 +117,7 @@ M.ts_ls = {
   single_file_support = false,
 }
 
-M.twiggy_language_server = {
+managed_servers.twiggy_language_server = {
   settings = {
     twiggy = {
       framework = 'symfony',
@@ -121,9 +127,9 @@ M.twiggy_language_server = {
   },
 }
 
-M.vue_ls = { init_options = { vue = { hybridMode = false } } }
+managed_servers.vue_ls = { init_options = { vue = { hybridMode = false } } }
 
-M.yamlls = function()
+managed_servers.yamlls = function()
   return require('kube_yaml_schema').yamlls_config {
     settings = {
       yaml = {
@@ -133,6 +139,18 @@ M.yamlls = function()
       },
     },
   }
+end
+
+function M.enable_unmanaged()
+  for name, config in pairs(M.unmanaged_servers) do
+    if type(config) == 'function' then
+      config = config()
+    end
+    if type(config) == 'table' then
+      vim.lsp.config(name, config)
+      vim.lsp.enable(name)
+    end
+  end
 end
 
 return M

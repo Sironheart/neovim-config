@@ -30,8 +30,10 @@ vim.diagnostic.config {
   },
 }
 
+local language_servers = require 'custom.language-server'
+
 require('lsp-setup').setup {
-  servers = require 'custom.language-server',
+  servers = language_servers.managed_servers,
   on_attach = function() end, -- Conform owns format-on-save.
   inlay_hints = { enabled = true },
   capabilities = require('blink.cmp').get_lsp_capabilities(),
@@ -59,6 +61,8 @@ require('lsp-setup').setup {
   },
 }
 
+language_servers.enable_unmanaged()
+
 require('conform').setup {
   formatters_by_ft = {
     elixir = { 'mix' },
@@ -74,11 +78,31 @@ require('conform').setup {
     python = { 'ruff_fix', 'ruff_format', 'ruff_organize_imports' },
     rust = { 'rustfmt' },
     terraform = { 'tofu_fmt' },
-    toml = { 'taplo' },
+    toml = function(bufnr)
+      local filename = vim.api.nvim_buf_get_name(bufnr)
+      local stem = vim.fs.basename(filename):gsub('^%.', ''):gsub('%.toml$', '')
+      local parent = vim.fs.basename(vim.fs.dirname(filename))
+      local directory = parent == 'conf.d' and vim.fs.basename(vim.fs.dirname(vim.fs.dirname(filename))) or parent
+      if
+        stem == 'mise'
+        or stem:match '^mise%.'
+        or ((directory == 'mise' or directory == '.mise') and (parent == 'conf.d' or stem == 'config' or stem:match '^config%.'))
+      then
+        return { 'mise' }
+      end
+      return { 'taplo' }
+    end,
     typescript = { 'oxfmt' },
     typescriptreact = { 'oxfmt' },
     vue = { 'oxfmt' },
     yaml = { 'oxfmt' },
+  },
+  formatters = {
+    mise = {
+      command = 'mise',
+      args = { 'fmt', '--stdin' },
+      stdin = true,
+    },
   },
   format_on_save = {
     timeout_ms = 500,
